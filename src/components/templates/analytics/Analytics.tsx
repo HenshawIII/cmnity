@@ -3,7 +3,6 @@ import { AnalyticCard } from '@/components/Card/Card';
 import { DatePickerWithRange } from '@/components/daterange';
 import { Button } from '@/components/ui/button';
 import React, { useState } from 'react';
-import { cardData } from '../../../../public/assets/data';
 import { ChartComponent } from './Chart';
 import { TopChart } from './topChatrt';
 import Performance from './Performance';
@@ -20,6 +19,14 @@ const Analytics = () => {
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
   };
+
+  const analyticsCards = [
+    { title: 'Total Views' },
+    { title: 'Total Watch time' },
+    { title: 'Average Watch Time' },
+    { title: 'Peak Viewers' }
+  ];
+
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Mobile Sidebar */}
@@ -46,14 +53,11 @@ const Analytics = () => {
                 <Button className="bg-main-blue">This month</Button>
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {cardData.map((item, index) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {analyticsCards.map((card, index) => (
                 <AnalyticCard
                   key={index}
-                  title={item.title}
-                  change={item.change}
-                  views={item.views}
-                  value={item.value}
+                  title={card.title}
                 />
               ))}
             </div>

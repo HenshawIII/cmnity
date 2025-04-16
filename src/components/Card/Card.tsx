@@ -12,6 +12,8 @@ import { Bars } from 'react-loader-spinner';
 import { useViewMetrics } from '@/app/hook/useViewerMetrics';
 import { FaLock } from 'react-icons/fa6';
 import Link from 'next/link';
+import { useLivepeerAnalytics } from '@/app/hook/useLivepeerAnalytics';
+
 interface VideoStreamCardProps {
   playbackId: string;
   streamName: string;
@@ -22,25 +24,64 @@ interface VideoStreamCardProps {
 }
 // Analytic Card
 export const AnalyticCard = ({ title, views, change, value, playtimeMins, loading }: AnalyticCardProps) => {
+  const { metrics, loading: metricsLoading } = useLivepeerAnalytics({ timeRange: 'all' });
+
+  const getCardData = () => {
+    switch (title) {
+      case 'Total Views':
+        return {
+          value: metrics?.totalViews?.toLocaleString() || '0',
+          change: metrics?.totalViews ? `${Math.round((metrics.totalViews / 100) * 100)}% from last period` : '0%',
+          trend: metrics?.totalViews && metrics.totalViews > 0 ? 'up' : 'down'
+        };
+      case 'Total Watch time':
+        return {
+          value: metrics?.totalWatchTime ? 
+            `${Math.floor(metrics.totalWatchTime / 3600)}h ${Math.floor((metrics.totalWatchTime % 3600) / 60)}m` : 
+            '0h 0m',
+          change: metrics?.totalWatchTime ? `${Math.round((metrics.totalWatchTime / 3600) * 100)}% from last period` : '0%',
+          trend: metrics?.totalWatchTime && metrics.totalWatchTime > 0 ? 'up' : 'down'
+        };
+      case 'Average Watch Time':
+        return {
+          value: metrics?.averageWatchTime ? 
+            `${Math.floor(metrics.averageWatchTime / 60)}m ${Math.floor(metrics.averageWatchTime % 60)}s` : 
+            '0m 0s',
+          change: metrics?.averageWatchTime ? `${Math.round((metrics.averageWatchTime / 60) * 100)}% from last period` : '0%',
+          trend: metrics?.averageWatchTime && metrics.averageWatchTime > 0 ? 'up' : 'down'
+        };
+      case 'Peak Viewers':
+        return {
+          value: metrics?.peakConcurrentViewers?.toLocaleString() || '0',
+          change: metrics?.peakConcurrentViewers ? `${Math.round((metrics.peakConcurrentViewers / 100) * 100)}% from last period` : '0%',
+          trend: metrics?.peakConcurrentViewers && metrics.peakConcurrentViewers > 0 ? 'up' : 'down'
+        };
+      default:
+        return {
+          value: views || playtimeMins || '0',
+          change: change || '0%',
+          trend: 'down'
+        };
+    }
+  };
+
+  const cardData = getCardData();
+
   return (
     <div className="w-full h-full flex flex-col">
       <div className="border flex flex-col justify-between bg-background-gray border-border-gray rounded-lg p-4 gap-y-5 h-full">
         <div>
           <p className="text-2xl font-bold break-words">{title}</p>
         </div>
-        {loading ? (
+        {loading || metricsLoading ? (
           <Bars width={25} height={25} color="#3351FF" />
         ) : (
           <div>
-            {views ? (
-              <p className="text-4xl font-extrabold tracking-wide">{views} Views</p>
-            ) : (
-              <p className="text-2xl font-bold tracking-wide">{playtimeMins}</p>
-            )}
+            <p className="text-4xl font-extrabold tracking-wide">{cardData.value}</p>
             <p className="text-xs flex items-center gap-1">
-              <span className="text-black-secondary-text">{value}</span>
+              <span className="text-black-secondary-text">{cardData.change}</span>
               <span>
-                {value < 0 ? (
+                {cardData.trend === 'down' ? (
                   <BiSolidDownArrow className="text-orange-drop text-xs" />
                 ) : (
                   <BiSolidUpArrow className="text-green-drop text-xs" />
