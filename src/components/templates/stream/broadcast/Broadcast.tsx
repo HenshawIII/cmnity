@@ -19,7 +19,7 @@ import { getIngest } from '@livepeer/react/external';
 import { toast } from 'sonner';
 import { Settings } from './Settings';
 import styles from './BroadcastScroll.module.css';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { RiVideoAddLine } from 'react-icons/ri';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -31,6 +31,11 @@ import { useViewMetrics } from '@/app/hook/useViewerMetrics';
 import { UploadAdsAsset } from '@/components/UploadVideoAsset';
 import { IoMdClose } from 'react-icons/io';
 import { usePrivy } from '@privy-io/react-auth';
+import { getStreamById } from '@/features/streamAPI';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '@/store/store';
+import { Root } from 'postcss';
+import { id } from 'ethers/lib/utils';
 
 interface Streams {
   streamKey: string;
@@ -40,7 +45,7 @@ interface Streams {
   createdAt?: string;
 }
 
-export function BroadcastWithControls({ streamName, streamKey, playbackId }: Streams) {
+export function BroadcastWithControls({streamName, streamKey, playbackId }: Streams) {
   const { user } = usePrivy();
   const creatorId = user?.wallet?.address || '';
   const host = process.env.NEXT_PUBLIC_BASE_URL;
@@ -59,7 +64,6 @@ export function BroadcastWithControls({ streamName, streamKey, playbackId }: Str
     title: streamName || 'WAGMI DAO Web3 Annual Conference | Live 2024',
     description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
   });
-
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [sessionTime, setSessionTime] = useState('00:00:00');
   const [showChat, setShowChat] = useState(true);
@@ -79,25 +83,44 @@ export function BroadcastWithControls({ streamName, streamKey, playbackId }: Str
 
   // Use the viewer count from metrics if available
   const viewerCount = viewerMetrics?.viewCount || 0;
-  // Timer for session
-  const startTimer = () => {
-    const startTime = Date.now();
-    const interval = setInterval(() => {
-      const elapsedTime = Date.now() - startTime;
-      const hours = Math.floor(elapsedTime / (1000 * 60 * 60))
-        .toString()
-        .padStart(2, '0');
-      const minutes = Math.floor((elapsedTime % (1000 * 60 * 60)) / (1000 * 60))
-        .toString()
-        .padStart(2, '0');
-      const seconds = Math.floor((elapsedTime % (1000 * 60)) / 1000)
-        .toString()
-        .padStart(2, '0');
-      setSessionTime(`${hours}:${minutes}:${seconds}`);
-    }, 1000);
 
-    return () => clearInterval(interval);
-  };
+  const startTimeRef = useRef<number>(0);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [timerStarted, setTimerStarted] = useState(false);
+  // Start/stop timer based on streamStatus
+  useEffect(() => {
+    // Live -> start timer
+    if (timerStarted) {
+      const stored = localStorage.getItem('broadcastStart');
+      const start = stored ? Number(stored) : Date.now();
+      startTimeRef.current = start;
+      localStorage.setItem('broadcastStart', start.toString());
+      intervalRef.current = setInterval(() => {
+        const delta = Date.now() - startTimeRef.current;
+        const hrs = Math.floor(delta / 3600000)
+          .toString()
+          .padStart(2, '0');
+        const mins = Math.floor((delta % 3600000) / 60000)
+          .toString()
+          .padStart(2, '0');
+        const secs = Math.floor((delta % 60000) / 1000)
+          .toString()
+          .padStart(2, '0');
+        setSessionTime(`${hrs}:${mins}:${secs}`);
+      }, 1000);
+    } else {
+      // Not live -> clear
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      localStorage.removeItem('broadcastStart');
+      setSessionTime('00:00:00');
+    }
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [timerStarted]);
 
   useEffect(() => {
     const stored = localStorage.getItem('channelCustomization');
@@ -119,6 +142,9 @@ export function BroadcastWithControls({ streamName, streamKey, playbackId }: Str
     }
   };
 
+  const handleStartStream = () => {
+    setTimerStarted(true);
+  };
   const toggleSidebar = () => {
     setSidebarCollapsed(!sidebarCollapsed);
   };
@@ -183,8 +209,8 @@ export function BroadcastWithControls({ streamName, streamKey, playbackId }: Str
             </button>
             <BroadcastLoadingIndicator />
             <button className="md:hidden flex gap-3  items-center px-4 py-2 bg-gray-100 rounded-md">
-              <span className="text-sm font-medium">{viewerCount}</span>
-              <span className="text-sm">Viewers</span>
+              <span className="font-medium">{viewerCount}</span>
+              <span className="">Viewers</span>
             </button>
             {/* Desktop Stats - Hidden on mobile */}
             <div
@@ -195,7 +221,7 @@ export function BroadcastWithControls({ streamName, streamKey, playbackId }: Str
               }}
             >
               <div className="flex flex-col items-center px-4 py-2 bg-gray-100 rounded-md">
-                <span className="font-medium">{sessionTime}</span>
+                <span className="font-medium">{sessionTime || '00:00:00'}</span>
                 <span>Session</span>
               </div>
               <button
@@ -220,7 +246,53 @@ export function BroadcastWithControls({ streamName, streamKey, playbackId }: Str
             </div>
 
             <div className="mt-2 sm:mt-0">
-              <BroadcastTrigger />
+              {/* Broacast trigger */}
+              <div className="flex items-center gap-2">
+                <Broadcast.EnabledTrigger className="rounded-md">
+                  <Broadcast.EnabledIndicator
+                    className="flex items-center bg-main-blue h-[40px] min-w-[150px] rounded-md text-black-primary-text px-4 justify-center"
+                    matcher={false}
+                    onClick={handleStartStream}
+                  >
+                    <span className="text-base text-black font-medium">Start Stream</span>
+                  </Broadcast.EnabledIndicator>
+                  {/* End Stream Dropdown */}
+                  <DropdownMenu.Root>
+                    <DropdownMenu.Trigger asChild>
+                      <Broadcast.EnabledIndicator
+                        className="flex items-center justify-center bg-red-500 h-[40px] w-full min-w-[150px] rounded-md text-black-primary-text px-4 cursor-pointer"
+                        matcher={true}
+                      >
+                        <span className="text-base text-black  font-medium">End Stream</span>
+                      </Broadcast.EnabledIndicator>
+                    </DropdownMenu.Trigger>
+                    <DropdownMenu.Portal>
+                      <DropdownMenu.Content
+                        className="p-6 flex flex-col w-[292px] items-center rounded-md mr-2 z-10 bg-white shadow-[0px_10px_38px_-10px_rgba(22,_23,_24,_0.35),_0px_10px_20px_-15px_rgba(22,_23,_24,_0.2)]"
+                        sideOffset={5}
+                      >
+                        <p className="text-black font-medium text-base mb-4 text-center">
+                          Are you sure you want to end this Stream?
+                        </p>
+                        <div className="flex gap-x-4">
+                          <DropdownMenu.Item
+                            className="flex items-center cursor-pointer px-6 py-3 border h-[40px] rounded-md text-black justify-center"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <p className="text-black font-medium text-sm">Cancel</p>
+                          </DropdownMenu.Item>
+                          <DropdownMenu.Item
+                            onClick={() => setTimerStarted(false)}
+                            className="flex items-center cursor-pointer px-6 py-3 bg-red-500 h-[40px] rounded-md text-black justify-center"
+                          >
+                            <p className="text-black font-medium text-sm">End Stream</p>
+                          </DropdownMenu.Item>
+                        </div>
+                      </DropdownMenu.Content>
+                    </DropdownMenu.Portal>
+                  </DropdownMenu.Root>
+                </Broadcast.EnabledTrigger>
+              </div>
             </div>
           </div>
 
@@ -560,61 +632,19 @@ export const BroadcastLoading = () => (
   </div>
 );
 
-export const BroadcastTrigger = () => {
-  const [timerStarted, setTimerStarted] = useState(false);
+// export const BroadcastTrigger = () => {
+// const [timerStarted, setTimerStarted] = useState(false);
 
-  // const handleStartStream = () => {
-  //   setTimerStarted(true);
-  //   setTimeout(() => {
-  //     startTimer(); // Start the timer after 5 seconds
-  //   }, 5000);
-  // };
-  return (
-    <div className="flex items-center gap-2">
-      <Broadcast.EnabledTrigger className="rounded-md">
-        <Broadcast.EnabledIndicator
-          className="flex items-center bg-main-blue h-[40px] min-w-[150px] rounded-md text-black-primary-text px-4 justify-center"
-          matcher={false}
-          // onClick={handleStartStream}
-        >
-          <span className="text-base text-black font-medium">Start Stream</span>
-        </Broadcast.EnabledIndicator>
-        {/* End Stream Dropdown */}
-        <DropdownMenu.Root>
-          <DropdownMenu.Trigger asChild>
-            <Broadcast.EnabledIndicator
-              className="flex items-center justify-center bg-red-500 h-[40px] w-full min-w-[150px] rounded-md text-black-primary-text px-4 cursor-pointer"
-              matcher={true}
-            >
-              <span className="text-base text-black  font-medium">End Stream</span>
-            </Broadcast.EnabledIndicator>
-          </DropdownMenu.Trigger>
-          <DropdownMenu.Portal>
-            <DropdownMenu.Content
-              className="p-6 flex flex-col w-[292px] items-center rounded-md mr-2 z-10 bg-white shadow-[0px_10px_38px_-10px_rgba(22,_23,_24,_0.35),_0px_10px_20px_-15px_rgba(22,_23,_24,_0.2)]"
-              sideOffset={5}
-            >
-              <p className="text-black font-medium text-base mb-4 text-center">
-                Are you sure you want to end this Stream?
-              </p>
-              <div className="flex gap-x-4">
-                <DropdownMenu.Item
-                  className="flex items-center cursor-pointer px-6 py-3 border h-[40px] rounded-md text-black justify-center"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <p className="text-black font-medium text-sm">Cancel</p>
-                </DropdownMenu.Item>
-                <DropdownMenu.Item className="flex items-center cursor-pointer px-6 py-3 bg-red-500 h-[40px] rounded-md text-black justify-center">
-                  <p className="text-black font-medium text-sm">End Stream</p>
-                </DropdownMenu.Item>
-              </div>
-            </DropdownMenu.Content>
-          </DropdownMenu.Portal>
-        </DropdownMenu.Root>
-      </Broadcast.EnabledTrigger>
-    </div>
-  );
-};
+//   // const handleStartStream = () => {
+//   //   setTimerStarted(true);
+//   //   setTimeout(() => {
+//   //     startTimer(); // Start the timer after 5 seconds
+//   //   }, 5000);
+//   // };
+//   return (
+
+//   );
+// };
 
 export const BroadcastLoadingIndicator = () => {
   return (

@@ -94,7 +94,7 @@ export const AnalyticCard = ({ title, views, change, value, playtimeMins, loadin
     </div>
   );
 };
-// Channel Card 
+// Channel Card
 export const ChannelCard: React.FC<ChannelCardProps> = ({
   title,
   goLive,
@@ -178,7 +178,7 @@ export const VideoStreamCard: React.FC<VideoStreamCardProps> = ({
 
   const playbackUrl = host
     ? `${host.includes('localhost') ? 'http' : 'https'}://${host}/view/${playbackId}?streamName=${encodeURIComponent(
-        streamName || ''
+        streamName || '',
       )}&id=${encodeURIComponent(creatorId || '')}`
     : null;
 
@@ -204,29 +204,26 @@ export const VideoStreamCard: React.FC<VideoStreamCardProps> = ({
               fill
               className="rounded object-cover"
             />
-               {/* Status overlay */}
-        <div className="absolute top-2 right-2 bg-black/70 px-2 py-1 rounded flex items-center gap-1">
-          {status ? (
-            <>
-              <div className="bg-[#04EB2A] h-[6px] w-[6px] rounded-full" />
-              <span className="text-xs text-black-primary-text font-medium select-none">Live</span>
-            </>
-          ) : (
-            <>
-              <div className="bg-gray-200 h-[6px] w-[6px] rounded-full" />
-              <span className="text-xs text-gray-500 font-medium select-none">Idle</span>
-            </>
-          )}
-        </div>
+            {/* Status overlay */}
+            <div className="absolute top-2 right-2 bg-black/70 px-2 py-1 rounded flex items-center gap-1">
+              {status ? (
+                <>
+                  <div className="bg-[#04EB2A] h-[6px] w-[6px] rounded-full" />
+                  <span className="text-xs text-black-primary-text font-medium select-none">Live</span>
+                </>
+              ) : (
+                <>
+                  <div className="bg-gray-200 h-[6px] w-[6px] rounded-full" />
+                  <span className="text-xs text-gray-500 font-medium select-none">Idle</span>
+                </>
+              )}
+            </div>
           </>
         )}
 
         {/* Hover overlay with play button */}
         <div className="absolute inset-0 flex justify-center items-center bg-opacity-0 group-hover:bg-opacity-60 transition duration-300">
-          <button
-            onClick={handlePlayClick}
-            className="text-white text-2xl opacity-0 group-hover:opacity-100"
-          >
+          <button onClick={handlePlayClick} className="text-white text-2xl opacity-0 group-hover:opacity-100">
             <FaPlay />
           </button>
         </div>
@@ -398,11 +395,11 @@ export const StreamVideoCard: React.FC<VideoCardProps> = ({
       setShowPaymentDialog(true); // Show payment dialog if gated
     } else {
       if (assetData.playbackId) {
-        window.open(`/player/${assetData.playbackId}`, '_blank');
+        window.open(`/player/${assetData.playbackId}?id=${encodeURIComponent(assetData.id)}`, '_blank');
       }
     }
   };
-
+  console.log(assetData.id)
   return (
     <>
       <div className="flex gap-3 p-2 cursor-pointer group">
@@ -467,7 +464,8 @@ export const StreamVideoCard: React.FC<VideoCardProps> = ({
           onClose={() => setShowPaymentDialog(false)}
           onPaymentSuccess={() => {
             setShowPaymentDialog(false);
-            window.open(`/player/${assetData.playbackId}`, '_blank');
+            // window.open(`/player/${assetData.playbackId}`, '_blank');
+            window.open(`/player/${assetData.playbackId}?id=${encodeURIComponent(assetData.id)}`, '_blank');
           }}
         />
       )}

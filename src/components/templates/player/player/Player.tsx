@@ -28,6 +28,7 @@ import image1 from '@/assets/image1.png';
 import { StreamVideoCard } from '@/components/Card/Card';
 import axios from 'axios';
 import { ColorRing } from 'react-loader-spinner';
+// import { DonationDialog } from './DonationDialog';
 
 // Assuming your product objects have { id, name, image, price }
 interface Product {
@@ -60,6 +61,14 @@ export function PlayerWithControls({
   const [products, setProducts] = useState<Product[]>([]);
   const [productsLoading, setProductsLoading] = useState<boolean>(false);
   const [productsError, setProductsError] = useState<string | null>(null);
+  const [donationDialogOpen, setDonationDialogOpen] = useState(false);
+  const [donationAmount, setDonationAmount] = useState<number>(0);
+
+  // Instead of alert, define a function to open the donation dialog with the desired amount.
+  const handleDonateClick = (amount: number) => {
+    setDonationAmount(amount);
+    setDonationDialogOpen(true);
+  };
   // --- Existing assets fetch ---
   useEffect(() => {
     dispatch(getAssets());
@@ -115,7 +124,6 @@ export function PlayerWithControls({
     }
   }, []);
 
-  
   // --- Playback URL ---
   const host = process.env.NEXT_PUBLIC_BASE_URL;
   const playbackUrl =
@@ -344,21 +352,21 @@ export function PlayerWithControls({
                   <button
                     className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-transform transform hover:scale-110 animate-bounce"
                     style={{ animationDelay: '0s' }}
-                    onClick={() => alert('You donated $5!')}
+                    onClick={() => handleDonateClick(5)}
                   >
                     $5
                   </button>
                   <button
                     className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-transform transform hover:scale-110 animate-bounce"
                     style={{ animationDelay: '0.2s' }}
-                    onClick={() => alert('You donated $10!')}
+                    onClick={() => handleDonateClick(10)}
                   >
                     $10
                   </button>
                   <button
                     className="bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600 transition-transform transform hover:scale-110 animate-bounce"
                     style={{ animationDelay: '0.4s' }}
-                    onClick={() => alert('You donated $20!')}
+                    onClick={() => handleDonateClick(20)}
                   >
                     $20
                   </button>
@@ -476,6 +484,13 @@ export function PlayerWithControls({
           </div>
         </div>
       </div>
+      {/* <DonationDialog
+        donationAmount={donationAmount}
+        streamTitle={title}
+        creatorAddress={id}
+        open={donationDialogOpen}
+        onOpenChange={setDonationDialogOpen}
+      /> */}
     </div>
   );
 }

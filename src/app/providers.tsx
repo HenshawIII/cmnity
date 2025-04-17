@@ -10,7 +10,6 @@ import { qMainnet, mainnet, metachain, baseSepolia } from 'viem/chains';
 import { defineChain } from 'viem';
 import { OnchainKitProvider } from '@coinbase/onchainkit';
 import { base } from 'wagmi/chains';
-import { StreamProvider } from '@/context/StreamContext';
 const EthBalanceContext = createContext<EthBalanceContextType | undefined>(undefined);
 
 export const useEthBalance = () => {
