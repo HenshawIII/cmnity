@@ -8,7 +8,6 @@ const Analytics = () => {
   const [activeFilter, setActiveFilter] = useState<'all' | 'month' | 'year'>('all'); // Filter state
   const [isLoading, setIsLoading] = useState(false);
   const { viewMetrics, loading, error, refetch } = useViewerMetrics({ filter: activeFilter }); // Fetch view metrics
-
   const insightsData = [
     {
       title: 'Total Views',
@@ -19,7 +18,7 @@ const Analytics = () => {
     {
       title: 'Total Watch time',
       playtimeMins: viewMetrics?.playtimeMins
-        ? `${Math.floor(viewMetrics.playtimeMins / 60)}h:${(viewMetrics.playtimeMins % 60).toFixed(1)}m`
+        ? `${Math.floor(viewMetrics.playtimeMins / 60)}h:${(viewMetrics.playtimeMins % 60).toFixed(1)}mins`
         : '0h:0.0m',
       value: 11.02,
       change: '30 from last stream',
@@ -27,10 +26,10 @@ const Analytics = () => {
   ];
 
   const handleFilterChange = async (filterType: 'all' | 'month' | 'year') => {
-    setIsLoading(true); // Set loading to true
+    setIsLoading(true);
     setActiveFilter(filterType);
-    await refetch(); // Refetch data
-    setIsLoading(false); // Set loading to false after refetch
+    await refetch();
+    setIsLoading(false);
   };
 
   return (
@@ -38,7 +37,6 @@ const Analytics = () => {
       {insightsData.map((insightsData) => (
         <AnalyticCard key={insightsData.title} {...insightsData} loading={isLoading} />
       ))}
-
       <div className="w-full h-full">
         <ul className="flex flex-col gap-y-2 h-full">
           {['all', 'LastMonth', 'Year'].map((filter) => (

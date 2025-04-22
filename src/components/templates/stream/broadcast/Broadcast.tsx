@@ -45,7 +45,7 @@ interface Streams {
   createdAt?: string;
 }
 
-export function BroadcastWithControls({streamName, streamKey, playbackId }: Streams) {
+export function BroadcastWithControls({ streamName, streamKey, playbackId }: Streams) {
   const { user } = usePrivy();
   const creatorId = user?.wallet?.address || '';
   const host = process.env.NEXT_PUBLIC_BASE_URL;

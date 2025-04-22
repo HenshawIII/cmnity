@@ -24,13 +24,13 @@ export function DatePickerWithRange({ className }: React.HTMLAttributes<HTMLDivE
       setManualFrom(value);
       if (value) {
         const parsedDate = parse(value, 'yyyy-MM-dd', new Date());
-        setDate(prev => ({ from: parsedDate, to: prev?.to || parsedDate }));
+        setDate((prev) => ({ from: parsedDate, to: prev?.to || parsedDate }));
       }
     } else {
       setManualTo(value);
       if (value) {
         const parsedDate = parse(value, 'yyyy-MM-dd', new Date());
-        setDate(prev => ({ from: prev?.from || parsedDate, to: parsedDate }));
+        setDate((prev) => ({ from: prev?.from || parsedDate, to: parsedDate }));
       }
     }
   };

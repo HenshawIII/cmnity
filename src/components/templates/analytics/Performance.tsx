@@ -17,7 +17,9 @@ const Performance = () => {
     },
     {
       title: 'Average Watch Time',
-      value: metrics?.averageWatchTime ? `${Math.floor(metrics.averageWatchTime / 60)}m ${Math.floor(metrics.averageWatchTime % 60)}s` : '0m 0s',
+      value: metrics?.averageWatchTime
+        ? `${Math.floor(metrics.averageWatchTime / 60)}m ${Math.floor(metrics.averageWatchTime % 60)}s`
+        : '0m 0s',
       metric: 'watchTime',
       trend: <ArrowUpRight className="text-green-500" />,
     },

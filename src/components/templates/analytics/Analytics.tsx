@@ -24,7 +24,7 @@ const Analytics = () => {
     { title: 'Total Views' },
     { title: 'Total Watch time' },
     { title: 'Average Watch Time' },
-    { title: 'Peak Viewers' }
+    { title: 'Peak Viewers' },
   ];
 
   return (
@@ -55,10 +55,8 @@ const Analytics = () => {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
               {analyticsCards.map((card, index) => (
-                <AnalyticCard
-                  key={index}
-                  title={card.title}
-                />
+                <div></div>
+                // <AnalyticCard key={index} title={card.title} />
               ))}
             </div>
           </div>

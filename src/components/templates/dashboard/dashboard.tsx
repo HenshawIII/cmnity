@@ -11,7 +11,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
-// import clsx from 'clsx';
 import { usePrivy } from '@privy-io/react-auth';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllStreams } from '@/features/streamAPI';
@@ -20,7 +19,6 @@ import type { RootState, AppDispatch } from '@/store/store';
 import image1 from '../../../../public/assets/images/image1.png';
 import Spinner from '@/components/Spinner';
 import UploadVideoAsset from '@/components/UploadVideoAsset';
-// import { IoChevronBack, IoChevronForward } from 'react-icons/io5';
 import type { Asset, Stream } from '@/interfaces';
 import MobileSidebar from '@/components/MobileSidebar';
 
@@ -66,18 +64,13 @@ const Dashboard = () => {
     return assets.filter((asset: Asset) => !!asset.playbackId && asset.creatorId?.value === user?.wallet?.address);
   }, [assets, user?.wallet?.address]);
 
-  const initiateLiveVideo = (id: string) => {
-    if (id) {
-      navigate.push(`/dashboard/stream?id=${id}`);
-    }
-  };
-  const toggleSidebar = () => {
-    setSidebarCollapsed(!sidebarCollapsed);
-  };
+  // NEW: only when not loading, no error, and zero existing streams
+  const canCreateStream = !streamsLoading && !streamsError && filteredStreams.length === 0;
 
-  const toggleMobileMenu = () => {
-    setMobileMenuOpen(!mobileMenuOpen);
-  };
+  const initiateLiveVideo = (id: string) => id && navigate.push(`/dashboard/stream?id=${id}`);
+  const toggleSidebar = () => setSidebarCollapsed((x) => !x);
+  // setSidebarCollapsed(!sidebarCollapsed)
+  const toggleMobileMenu = () => setMobileMenuOpen((x) => !x);
 
   if (!ready || !authenticated) {
     return (
@@ -116,7 +109,7 @@ const Dashboard = () => {
                   </div>
                 </div>
               ))
-            ) : filteredStreams.length === 0 ? (
+            ) : canCreateStream ? (
               // Show "Create Channel" dialog if no streams are available
               <Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <Dialog.Trigger asChild>
@@ -129,11 +122,13 @@ const Dashboard = () => {
                 </Dialog.Trigger>
                 <Dialog.Portal>
                   <Dialog.Overlay className="fixed inset-0 bg-black opacity-70" />
-                  <Dialog.Content className="fixed left-1/2 top-1/2 max-h-[85vh] w-[90vw] flex mt-4 flex-col justify-center items-center max-w-[34rem] -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white px-10 max-sm:px-6 py-6 shadow-lg">
-                    <Dialog.Title className="text-black-primary-text text-center my-4 text-base font-bold">
-                      Create New Channel
-                    </Dialog.Title>
-                    <CreateLivestream close={() => setIsDialogOpen(false)} />
+                  <Dialog.Content className="fixed left-1/2 top-1/2 max-h-[85vh] h-full w-[90vw] overflow-y-auto flex py-16 mt-10 flex-col justify-center items-center max-w-[34rem] -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white px-10 max-sm:px-6  shadow-lg">
+                    <Dialog.Title className="text-black text-center text-xl font-bold">Create New Channel</Dialog.Title>
+
+                    <div className="w-full h-full my-5">
+                      <CreateLivestream close={() => setIsDialogOpen(false)} />
+                    </div>
+
                     <Dialog.Close asChild>
                       <button
                         className="absolute right-2.5 top-2.5 inline-flex size-[25px] appearance-none items-center justify-center rounded-full text-violet11 hover:bg-violet4 focus:shadow-[0_0_0_2px] focus:shadow-violet7 focus:outline-none"

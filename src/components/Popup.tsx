@@ -35,7 +35,6 @@ export { Popover, PopoverTrigger, PopoverContent, PopoverAnchor };
 //Usage
 import { useState } from 'react';
 import { AiOutlineCloudDownload, AiOutlineEdit } from 'react-icons/ai';
-import { BiNotepad } from 'react-icons/bi';
 import { BsThreeDotsVertical } from 'react-icons/bs';
 import { HiLink } from 'react-icons/hi';
 import { PiCalendarCheckBold } from 'react-icons/pi';
@@ -52,6 +51,7 @@ import { deleteAsset, getAssets } from '@/features/assetsAPI';
 import { resetAssetStatus } from '@/features/assetsSlice';
 import { UpdateLivestream } from './UpdateLivestream';
 import { CustomizeChannelDialog } from './Dialog';
+import axios from 'axios';
 
 const listItemClassNames = {
   option: 'flex items-center text-lg px-5 py-2 hover:bg-gray-100 cursor-pointer',
@@ -64,14 +64,13 @@ export const Popup = ({ playbackId, streamId }: PopupProps) => {
   const [alertOpen, setAlertOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isCustomizeOpen, setIsCustomizeOpen] = useState(false);
+  // const [isCustomizeOpen, setIsCustomizeOpen] = useState(false);
   const host = process.env.NEXT_PUBLIC_BASE_URL;
   const playbackUrl =
     host && playbackId ? `${host.includes('localhost') ? 'http' : 'https'}://${host}/view/${playbackId}` : null;
 
   const handleEditDetails = () => {
     setIsDialogOpen(true);
-    // return <UpdateLivestream  open={isDialogOpen} onClose={() => setIsDialogOpen(false)}  id= {streamId}/>
   };
 
   const handleCopyStreamLink = () => {
@@ -94,10 +93,10 @@ export const Popup = ({ playbackId, streamId }: PopupProps) => {
     // TODO: Open schedule modal or navigate accordingly.
   };
 
-  const handleCustomizeChannel = () => {
-    toast('Customize channel clicked');
-    // TODO: Open customization modal or navigate accordingly.
-  };
+  // const handleCustomizeChannel = () => {
+  //   toast('Customize channel clicked');
+  //   // TODO: Open customization modal or navigate accordingly.
+  // };
 
   const handleDeleteChannel = () => {
     // Simply open the alert dialog.
@@ -106,6 +105,19 @@ export const Popup = ({ playbackId, streamId }: PopupProps) => {
   const confirmDelete = async () => {
     setIsLoading(true);
     try {
+      // First, make a request to the `/deletestream` endpoint with the playbackId
+      const response = await axios.delete('/deletestream', {
+        data: { playbackId },
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.status !== 200) {
+        throw new Error(response.data.error || 'Failed to delete stream from external system');
+      }
+
+      // If the above request is successful, proceed to delete the stream from the Redux store
       await dispatch(deleteStream(streamId)).unwrap();
 
       toast.success('Channel deleted successfully');
@@ -113,7 +125,7 @@ export const Popup = ({ playbackId, streamId }: PopupProps) => {
       dispatch(getAllStreams());
       setAlertOpen(false);
     } catch (err: any) {
-      toast.error(error || 'Failed to delete channel');
+      toast.error(err.message || error || 'Failed to delete channel');
     }
     setIsLoading(false);
   };
@@ -139,10 +151,6 @@ export const Popup = ({ playbackId, streamId }: PopupProps) => {
             <PiCalendarCheckBold className={listItemClassNames.icon} />
             <p className="ml-2 text-sm font-medium text-black-primary-text">Schedule stream</p>
           </DropdownMenu.Item>
-          {/* <DropdownMenu.Item onSelect={handleCustomizeChannel} className={listItemClassNames.option}>
-            <BiNotepad className={listItemClassNames.icon} />
-            <p className="ml-2 text-sm font-medium text-black-primary-text">Customize channel</p>
-          </DropdownMenu.Item> */}
           <DropdownMenu.Item onSelect={handleDeleteChannel} className={listItemClassNames.option}>
             <RiDeleteBin6Line className={`${listItemClassNames.icon} text-red-700`} />
             <p className="ml-2 text-sm font-medium text-black-primary-text">Delete channel</p>
@@ -160,7 +168,6 @@ export const Popup = ({ playbackId, streamId }: PopupProps) => {
         loading={isLoading}
       />
       {isDialogOpen && <UpdateLivestream open={isDialogOpen} onClose={() => setIsDialogOpen(false)} id={streamId} />}
-      {/* {isCustomizeOpen && <CustomizeChannelDialog initialValues={}/>} */}
     </>
   );
 };

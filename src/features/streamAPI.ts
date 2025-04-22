@@ -2,15 +2,19 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import { InputCreatorIdType } from 'livepeer/models/components';
 import api from '../utils/api'; // Assuming you have an axios instance setup
 import axios from 'axios';
-import { toast } from 'sonner';
 
 interface CreateLivestreamProps {
   streamName: string;
   record: boolean;
   creatorId: string;
-  paymentOption?: 'free' | 'one-time' | 'monthly';
+  viewMode?: 'free' | 'one-time' | 'monthly';
   amount?: number;
-  data?: any;
+  description: string;
+  bgcolor: string;
+  color: string;
+  fontSize: string;
+  logo: string;
+  donation?: number[];
 }
 
 interface UpdateLivestreamProps {
@@ -23,7 +27,22 @@ interface UpdateLivestreamProps {
 
 export const createLivestream = createAsyncThunk(
   'streams/createLivestream',
-  async ({ streamName, record, creatorId, paymentOption, amount }: CreateLivestreamProps, { rejectWithValue }) => {
+  async (
+    {
+      streamName,
+      record,
+      creatorId,
+      viewMode,
+      amount,
+      description,
+      bgcolor,
+      color,
+      fontSize,
+      logo,
+      donation,
+    }: CreateLivestreamProps,
+    { rejectWithValue },
+  ) => {
     try {
       // Step 1: Create the livestream
       const response = await api.post('/stream', {
@@ -35,24 +54,39 @@ export const createLivestream = createAsyncThunk(
         },
       });
 
-      const { playbackId, streamKey, name } = response.data;
+      const { playbackId, name } = response.data;
 
       // Step 2: Send the response data to another endpoint
-      // const viewMode = paymentOption; // Use paymentOption as viewMode
-      const data = {
-        streamKey,
+      // const data = {
+      //   playbackId,
+      //   viewMode,
+      //   description,
+      //   amount,
+      //   streamName: name || streamName,
+      //   creatorId,
+      //   logo,
+      //   bgColor,
+      //   color,
+      //   fontSize,
+      //   donation,
+      // };
+      // console.log('Data to be sent:', data);
+      const secondResponse = await axios.post(`https://chaintv.onrender.com/api/streams/addstream`, {
         playbackId,
-        creatorId,
-        viewMode: paymentOption,
+        viewMode,
+        description,
         amount,
         streamName: name || streamName,
-      };
-
-      const secondResponse = await axios.post(`https://chaintv.onrender.com/api/streams/addstream`, { data });
-
+        title: name || streamName,
+        creatorId,
+        logo,
+        bgcolor,
+        color,
+        fontSize,
+        donation,
+      });
       if (secondResponse.status === 200) {
-        console.log('Data sent successfully:', secondResponse.data);
-        toast.success('livestream added');
+        // console.log('Data sent successfully:', data);
       } else if (secondResponse.status !== 200) {
         console.error('Error sending data:', secondResponse.data);
       } else {

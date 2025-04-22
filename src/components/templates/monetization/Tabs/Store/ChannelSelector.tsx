@@ -31,9 +31,7 @@ export const ChannelSelector = ({}: ChannelSelectorProps) => {
         disable: !newState,
       });
       setStreamEnabled(newState);
-      toast.success(
-        newState ? 'Live streams enabled' : 'Live streams disabled'
-      );
+      toast.success(newState ? 'Live streams enabled' : 'Live streams disabled');
     } catch (err) {
       toast.error('Failed to update live stream status');
     } finally {
@@ -49,9 +47,7 @@ export const ChannelSelector = ({}: ChannelSelectorProps) => {
         disable: !newState,
       });
       setVideoEnabled(newState);
-      toast.success(
-        newState ? 'Video assets enabled' : 'Video assets disabled'
-      );
+      toast.success(newState ? 'Video assets enabled' : 'Video assets disabled');
     } catch (err) {
       toast.error('Failed to update video asset status');
     } finally {
@@ -63,10 +59,7 @@ export const ChannelSelector = ({}: ChannelSelectorProps) => {
     <div className="mb-8 space-y-6">
       {/* Live Stream Toggle */}
       <div className="flex items-center justify-between">
-        <Label
-          htmlFor="stream-toggle"
-          className="text-lg font-medium"
-        >
+        <Label htmlFor="stream-toggle" className="text-lg font-medium">
           Stream Switch
         </Label>
         <Switch
@@ -79,20 +72,11 @@ export const ChannelSelector = ({}: ChannelSelectorProps) => {
 
       {/* Video Asset Toggle */}
       <div className="flex items-center justify-between">
-        <Label
-          htmlFor="video-toggle"
-          className="text-lg font-medium"
-        >
+        <Label htmlFor="video-toggle" className="text-lg font-medium">
           Video Switch
         </Label>
-        <Switch
-          id="video-toggle"
-          checked={videoEnabled}
-          onCheckedChange={handleVideoToggle}
-          disabled={togglingVideo}
-        />
+        <Switch id="video-toggle" checked={videoEnabled} onCheckedChange={handleVideoToggle} disabled={togglingVideo} />
       </div>
-
     </div>
   );
 };

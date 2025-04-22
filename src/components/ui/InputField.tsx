@@ -1,5 +1,5 @@
 interface InputFieldProps {
-  label: string;
+  label?: string;
   type: string;
   className?: string;
 }

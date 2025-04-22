@@ -13,14 +13,15 @@ export function ChartComponent() {
   const emptyData = Array.from({ length: 30 }, (_, i) => ({
     name: format(subDays(new Date(), 29 - i), 'MMM d'),
     time: 0,
-    views: 0
+    views: 0,
   }));
 
-  const chartData = metrics?.timeSeriesData?.map(item => ({
-    name: format(new Date(item.timestamp), 'MMM d'),
-    time: item.watchTime / 60, // Convert to minutes
-    views: item.views
-  })) || emptyData;
+  const chartData =
+    metrics?.timeSeriesData?.map((item) => ({
+      name: format(new Date(item.timestamp), 'MMM d'),
+      time: item.watchTime / 60, // Convert to minutes
+      views: item.views,
+    })) || emptyData;
 
   if (loading) {
     return (
@@ -53,7 +54,7 @@ export function ChartComponent() {
               domain={[0, 'dataMax']}
               tickFormatter={(value) => `${value.toLocaleString()}m`}
             />
-            <Tooltip 
+            <Tooltip
               formatter={(value: number, name: string) => {
                 if (name === 'time') return [`${value.toFixed(1)} minutes`, 'Watch Time'];
                 return [value.toLocaleString(), 'Views'];

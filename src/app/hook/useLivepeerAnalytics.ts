@@ -24,11 +24,7 @@ interface LivepeerAnalyticsProps {
 const LIVEPEER_API_KEY = process.env.NEXT_PUBLIC_LIVEPEER_API_KEY;
 const LIVEPEER_API_URL = 'https://livepeer.studio/api';
 
-export const useLivepeerAnalytics = ({
-  streamId,
-  assetId,
-  timeRange = '24h',
-}: LivepeerAnalyticsProps) => {
+export const useLivepeerAnalytics = ({ streamId, assetId, timeRange = '24h' }: LivepeerAnalyticsProps) => {
   const { user } = usePrivy();
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,16 +38,16 @@ export const useLivepeerAnalytics = ({
 
     try {
       setLoading(true);
-      
+
       // Fetch stream metrics
       const streamResponse = await fetch(
         `${LIVEPEER_API_URL}/stream/${streamId}/metrics?from=${getTimeRangeStart(timeRange)}`,
         {
           headers: {
-            'Authorization': `Bearer ${LIVEPEER_API_KEY}`,
+            Authorization: `Bearer ${LIVEPEER_API_KEY}`,
             'Content-Type': 'application/json',
           },
-        }
+        },
       );
 
       if (!streamResponse.ok) {
@@ -59,7 +55,7 @@ export const useLivepeerAnalytics = ({
       }
 
       const streamData = await streamResponse.json();
-      
+
       // Process the data into our metrics format
       const processedMetrics: LivepeerMetrics = {
         totalViews: streamData.totalViews || 0,
@@ -68,11 +64,12 @@ export const useLivepeerAnalytics = ({
         peakConcurrentViewers: streamData.peakConcurrentViewers || 0,
         viewerEngagement: streamData.viewerEngagement || 0,
         playbackErrorRate: streamData.playbackErrorRate || 0,
-        timeSeriesData: streamData.timeSeriesData?.map((point: any) => ({
-          timestamp: point.timestamp,
-          views: point.views || 0,
-          watchTime: point.watchTime || 0,
-        })) || [],
+        timeSeriesData:
+          streamData.timeSeriesData?.map((point: any) => ({
+            timestamp: point.timestamp,
+            views: point.views || 0,
+            watchTime: point.watchTime || 0,
+          })) || [],
       };
 
       setMetrics(processedMetrics);
@@ -109,4 +106,4 @@ function getTimeRangeStart(timeRange: string): number {
     default:
       return now - 24 * 60 * 60 * 1000;
   }
-} 
+}
