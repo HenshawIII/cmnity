@@ -15,6 +15,7 @@ import { getAllStreams, getStreamById } from '@/features/streamAPI';
 import { useGetAssetGate } from '@/app/hook/useAssetGate';
 import { StreamGateModal } from '@/components/templates/player/player/StreamGateModal';
 import { StreamPayment } from '@/components/templates/player/player/StreamPayment';
+import Image from 'next/image';
 
 const PlayerPage = () => {
   const { user } = usePrivy();
@@ -210,7 +211,7 @@ const PlayerPage = () => {
                 <div className="flex space-x-4 overflow-x-auto">
                   {products.map((product: any) => (
                     <div key={product.id} className="min-w-[200px] border rounded-lg p-4 flex flex-col items-center">
-                      <img
+                      <Image
                         src={typeof product.imageUrl === 'string' ? product.imageUrl : image1.src}
                         alt={product.name}
                         className="w-full h-32 object-cover rounded"

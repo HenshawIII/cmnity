@@ -54,10 +54,10 @@ const Analytics = () => {
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              {analyticsCards.map((card, index) => (
-                <div></div>
-                // <AnalyticCard key={index} title={card.title} />
-              ))}
+              {/* {analyticsCards.map((card, index) => (
+                // <div></div>
+                <AnalyticCard key={index} title={card.title} />
+              ))} */}
             </div>
           </div>
           <div className="flex flex-col lg:flex-col gap-5 w-full md:w-[70%]">

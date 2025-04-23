@@ -83,7 +83,7 @@ export function PlayerWithControls({
   }, [dispatch]);
 
   useEffect(() => {
-    assetsError && toast.error('Failed to fetch assets: ' + assetsError);
+    if (assetsError) {toast.error('Failed to fetch assets: ' + assetsError);}
   }, [assetsError]);
 
   const fetchProducts = useCallback(async () => {
@@ -104,36 +104,43 @@ export function PlayerWithControls({
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
-  if (loading)
+
+  // 1. Loading state
+  if (loading) {
     return (
       <div className="flex items-center justify-center flex-col h-screen">
         <Bars width={40} height={40} color="#3351FF" />
         <p>Loading stream…</p>
       </div>
     );
-  if (error) return <div className="text-center text-red-500 mt-10">{error}</div>;
+  }
 
-  // 2. If not allowed yet, show gate modal
+  // 2. Error state
+  if (error) {
+    return (
+      <div className="text-center text-red-500 mt-10">
+        {error}
+      </div>
+    );
+  }
+
+  // 3. If not allowed yet, show gate modal
   if (!hasAccess && stream?.viewMode !== 'free') {
     return (
-      <>
-        <StreamGateModal
-          open={!hasAccess}
-          onClose={() => {
-            router.back();
+      <StreamGateModal
+        open={!hasAccess}
+        onClose={() => router.back()}
+        title="Locked Stream"
+        description={`A one-time fee of $${stream?.amount.toFixed(2)} unlocks access.`}
+      >
+        <StreamPayment
+          stream={stream as any}
+          onPaid={(addr) => {
+            setHasAccess(true);
+            markPaid(addr);
           }}
-          title="Locked Stream"
-          description={`A one-time fee of $${stream?.amount.toFixed(2)} unlocks access.`}
-        >
-          <StreamPayment
-            stream={stream as any}
-            onPaid={(addr) => {
-              setHasAccess(true);
-              markPaid(addr);
-            }}
-          />
-        </StreamGateModal>
-      </>
+        />
+      </StreamGateModal>
     );
   }
 
