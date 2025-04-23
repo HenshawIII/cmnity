@@ -106,20 +106,12 @@ export const Popup = ({ playbackId, streamId }: PopupProps) => {
     setIsLoading(true);
     try {
       // First, make a request to the `/deletestream` endpoint with the playbackId
-      const response = await axios.delete('/deletestream', {
-        data: { playbackId },
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
+      const response = await axios.delete(`https://chaintv.onrender.com/api/streams/deletestream?${playbackId}`);
       if (response.status !== 200) {
         throw new Error(response.data.error || 'Failed to delete stream from external system');
       }
-
       // If the above request is successful, proceed to delete the stream from the Redux store
       await dispatch(deleteStream(streamId)).unwrap();
-
       toast.success('Channel deleted successfully');
       dispatch(resetStreamStatus());
       dispatch(getAllStreams());
@@ -172,6 +164,7 @@ export const Popup = ({ playbackId, streamId }: PopupProps) => {
   );
 };
 
+// deletevideo
 export const AssetPopup = ({ asset }: AssetPopProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const { error } = useSelector((state: RootState) => state.assets);
@@ -186,6 +179,11 @@ export const AssetPopup = ({ asset }: AssetPopProps) => {
   const confirmDelete = async () => {
     setIsLoading(true);
     try {
+            // First, make a request to the `/deletestream` endpoint with the playbackId
+            const response = await axios.delete(`https://chaintv.onrender.com/api/videos/deletevideo?playbackId=${asset.playbackId}`);
+            if (response.status !== 200) {
+              throw new Error(response.data.error || 'Failed to delete stream from external system');
+            }
       await dispatch(deleteAsset(asset.id)).unwrap();
       toast.success('Asset deleted successfully');
       dispatch(resetAssetStatus());

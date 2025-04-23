@@ -98,14 +98,11 @@ export function CreateLivestream({ close }: CreateLivestreamProps) {
     if (formData.viewMode !== 'free' && (!formData.amount || formData.amount <= 0)) {
       newErrors.amount = 'Invalid amount';
     }
-    if (!formData.channelDescription) {
-      newErrors.channelDescription = 'Required';
-    } else {
-      // Enforce max 50 words
-      const words = formData.channelDescription.trim().split(/\s+/).filter(Boolean);
-      if (words.length < 50) {
-        newErrors.channelDescription = 'Description must be 50 words or above';
-      }
+    const word = formData.channelDescription.trim()
+    if (!word) {
+      newErrors.channelDescription = 'Required'
+    } else if (word.length < 20) {
+      newErrors.channelDescription = 'Description must be at least 20 characters'
     }
 
     if (Object.keys(newErrors).length) {
@@ -253,7 +250,7 @@ export function CreateLivestream({ close }: CreateLivestreamProps) {
         {/* Channel Description (textarea) */}
         <div className="flex flex-col">
           <label className="text-sm pb-1 font-medium">
-            Channel Description <span className="text-xs text-gray-500">(max 50 words)</span>
+            Channel Description <span className="text-xs text-gray-500">(min 20 character)</span>
           </label>
           <textarea
             name="channelDescription"
@@ -266,9 +263,11 @@ export function CreateLivestream({ close }: CreateLivestreamProps) {
           />
           {/* live word count */}
           <p className="text-xs text-gray-500 mt-1">
-            {formData.channelDescription.trim().split(/\s+/).filter(Boolean).length} / 50 words
+            {formData.channelDescription.trim().length} / 50 characters
           </p>
-          {errors.channelDescription && <p className="text-red-500 text-xs">{errors.channelDescription}</p>}
+          {errors.channelDescription && (
+            <p className="text-red-500 text-xs">{errors.channelDescription}</p>
+          )}
         </div>
         <div className="flex flex-col">
           <label className="text-sm pb-1 font-medium text-black">Donation Presets</label>
