@@ -12,17 +12,18 @@ import { AppDispatch } from '@/store/store';
 import axios from 'axios';
 import InputField from './ui/InputField';
 
-type PaymentOption = 'free' | 'one-time' | 'monthly';
+type viewMode = 'free' | 'one-time' | 'monthly';
 export default function UploadVideoAsset({ onClose }: { onClose: () => void }) {
   const { user } = usePrivy();
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState('');
-  const [paymentOption, setPaymentOption] = useState<PaymentOption>('free');
+  const [viewMode, setviewMode] = useState<viewMode>('free');
   const [amount, setAmount] = useState<number | null>(null);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [errors, setErrors] = useState<{ amount?: string }>({});
+  const [presetValues, setPresetValues] = useState<number[]>([0, 0, 0, 0]);
 
   const dispatch = useDispatch<AppDispatch>();
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -40,8 +41,8 @@ export default function UploadVideoAsset({ onClose }: { onClose: () => void }) {
     e.preventDefault();
   }, []);
 
-  const handlePaymentOptionChange = (option: PaymentOption) => {
-    setPaymentOption(option);
+  const handleviewModeChange = (option: viewMode) => {
+    setviewMode(option);
     setErrors((prev) => ({ ...prev, amount: undefined })); // Clear amount error when switching options
   };
 
@@ -53,6 +54,12 @@ export default function UploadVideoAsset({ onClose }: { onClose: () => void }) {
       setErrors((prev) => ({ ...prev, amount: undefined }));
     }
     setAmount(value);
+  };
+
+  const handlePresetChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const newVals = [...presetValues];
+    newVals[index] = parseFloat(e.target.value) || 0;
+    setPresetValues(newVals);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -82,20 +89,19 @@ export default function UploadVideoAsset({ onClose }: { onClose: () => void }) {
         },
       });
 
-      const { playbackId, streamKey, name } = response.data.asset;
-      console.log('response2', response.data.asset);
-      // Step 2: Send the response data to another endpoint
-      const data = {
+      const { playbackId, name } = response.data.asset;
+      console.log('response2', playbackId, name);
+
+      const secondResponse = await axios.post(`https://chaintv.onrender.com/api/videos/addvideo`, {
         playbackId,
-        creatorId: user?.wallet?.address || '',
-        viewMode: paymentOption,
+        viewMode,
         amount,
-        assetName: name,
-      };
-      const secondResponse = await axios.post(`https://chaintv.onrender.com/api/videos/addvideo`, { data });
+        assetName: name || title,
+        creatorId: user?.wallet?.address,
+        donation: presetValues,
+      });
       if (secondResponse.status === 200) {
         console.log('Data sent successfully:', secondResponse.data);
-        // toast.success('livestream added');
       } else if (secondResponse.status !== 200) {
         console.error('Error sending data:', secondResponse.data);
       }
@@ -206,30 +212,30 @@ export default function UploadVideoAsset({ onClose }: { onClose: () => void }) {
           <div className="flex gap-2 mb-2">
             <button
               type="button"
-              onClick={() => handlePaymentOptionChange('free')}
+              onClick={() => handleviewModeChange('free')}
               className={clsx(
                 'px-4 py-2 border rounded-md transition duration-200',
-                paymentOption === 'free' ? 'bg-main-blue text-white' : 'bg-white text-gray-700 hover:bg-gray-100',
+                viewMode === 'free' ? 'bg-main-blue text-white' : 'bg-white text-gray-700 hover:bg-gray-100',
               )}
             >
               Free
             </button>
             <button
               type="button"
-              onClick={() => handlePaymentOptionChange('one-time')}
+              onClick={() => handleviewModeChange('one-time')}
               className={clsx(
                 'px-4 py-2 border rounded-md transition duration-200',
-                paymentOption === 'one-time' ? 'bg-main-blue text-white' : 'bg-white text-gray-700 hover:bg-gray-100',
+                viewMode === 'one-time' ? 'bg-main-blue text-white' : 'bg-white text-gray-700 hover:bg-gray-100',
               )}
             >
               One-time
             </button>
             <button
               type="button"
-              onClick={() => handlePaymentOptionChange('monthly')}
+              onClick={() => handleviewModeChange('monthly')}
               className={clsx(
                 'px-4 py-2 border rounded-md transition duration-200',
-                paymentOption === 'monthly' ? 'bg-main-blue text-white' : 'bg-white text-gray-700 hover:bg-gray-100',
+                viewMode === 'monthly' ? 'bg-main-blue text-white' : 'bg-white text-gray-700 hover:bg-gray-100',
               )}
             >
               Monthly
@@ -237,7 +243,7 @@ export default function UploadVideoAsset({ onClose }: { onClose: () => void }) {
           </div>
         </div>
 
-        {paymentOption !== 'free' && (
+        {viewMode !== 'free' && (
           <div className="flex flex-col">
             <label htmlFor="amount" className="block text-sm font-medium pb-2 text-gray-900">
               Amount
@@ -260,19 +266,41 @@ export default function UploadVideoAsset({ onClose }: { onClose: () => void }) {
           </div>
         )}
 
+        <div className="flex flex-col">
+          <label className="text-sm pb-1 font-medium text-black">Donation Presets</label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+            {presetValues.map((value, i) => (
+              <input
+                key={i}
+                type="text"
+                className="w-full border rounded-lg p-3 outline-none focus:ring-2 focus:text-black"
+                value={value}
+                onChange={(e) => handlePresetChange(i, e)}
+                min="0"
+                placeholder={`Preset Amount ${i + 1}`}
+              />
+            ))}
+          </div>
+        </div>
+
         {error && <p className="text-red-500 text-sm">{error}</p>}
 
         {uploading && (
-          <div className="flex items-center gap-4">
-            <RotatingLines
-              visible={true}
-              strokeWidth="5"
-              animationDuration="0.75"
-              strokeColor="#main-blue"
-              ariaLabel="upload-loading"
-              width="24"
-            />
-            <span>{progress}%</span>
+          <div className="flex flex-col w-full gap-2">
+            <div className="flex items-center gap-4">
+              <RotatingLines
+                visible={true}
+                strokeWidth="5"
+                animationDuration="0.75"
+                strokeColor="#main-blue"
+                ariaLabel="upload-loading"
+                width="24"
+              />
+              <span className="text-sm font-medium">{progress}%</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded h-2 overflow-hidden">
+              <div className="h-full bg-main-blue transition-all duration-300" style={{ width: `${progress}%` }} />
+            </div>
           </div>
         )}
 
@@ -281,7 +309,18 @@ export default function UploadVideoAsset({ onClose }: { onClose: () => void }) {
           disabled={uploading}
           className="mt-2 flex items-center justify-center gap-2 bg-main-blue text-white rounded-md px-4 py-2 hover:bg-blue-700 transition duration-200 disabled:opacity-50"
         >
-          {uploading ? 'Uploading...' : 'Upload Video'}
+          {uploading ? (
+            <RotatingLines
+              visible={true}
+              strokeWidth="5"
+              animationDuration="0.75"
+              strokeColor="#fff"
+              ariaLabel="upload-loading"
+              width="20"
+            />
+          ) : (
+            'Upload Video'
+          )}
         </button>
       </form>
     </div>
@@ -481,16 +520,21 @@ export function UploadAdsAsset({ onClose }: { onClose: () => void }) {
         {error && <p className="text-red-500 text-sm">{error}</p>}
 
         {uploading && (
-          <div className="flex items-center gap-4">
-            <RotatingLines
-              visible={true}
-              strokeWidth="5"
-              animationDuration="0.75"
-              strokeColor="#main-blue"
-              ariaLabel="upload-loading"
-              width="24"
-            />
-            <span>{progress}%</span>
+          <div className="flex flex-col w-full gap-2">
+            <div className="flex items-center gap-4">
+              <RotatingLines
+                visible={true}
+                strokeWidth="5"
+                animationDuration="0.75"
+                strokeColor="#main-blue"
+                ariaLabel="upload-loading"
+                width="24"
+              />
+              <span className="text-sm font-medium">{progress}%</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded h-2 overflow-hidden">
+              <div className="h-full bg-main-blue transition-all duration-300" style={{ width: `${progress}%` }} />
+            </div>
           </div>
         )}
 

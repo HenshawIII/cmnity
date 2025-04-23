@@ -95,11 +95,6 @@ const VideoWithControl = ({ src }: { src: Src[] }) => {
           </Player.Controls>
         </Player.Container>
       </Player.Root>
-      <div className="flex flex-col mt-4">
-        {/* <p className="text-sm ">Title</p>
-        <p className="text-sm ">Description</p>
-        <p className="text-sm ">Creator</p> */}
-      </div>
     </div>
   );
 };

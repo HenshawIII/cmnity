@@ -10,21 +10,31 @@ import { StreamVideoCard, VideoStreamCard } from '@/components/Card/Card'; // Yo
 import type { Asset, Stream } from '@/interfaces';
 import { VideoPlayer } from '@/components/templates/dashboard/VideoPlayer';
 import { usePrivy } from '@privy-io/react-auth';
-import { ColorRing } from 'react-loader-spinner';
+import { Bars, ColorRing } from 'react-loader-spinner';
 import { getAllStreams, getStreamById } from '@/features/streamAPI';
-import { id } from 'ethers/lib/utils';
+import { useGetAssetGate } from '@/app/hook/useAssetGate';
+import { StreamGateModal } from '@/components/templates/player/player/StreamGateModal';
+import { StreamPayment } from '@/components/templates/player/player/StreamPayment';
 
 const PlayerPage = () => {
   const { user } = usePrivy();
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const streamId = searchParams.get('id')
+  const streamId = searchParams.get('id');
   const dispatch = useDispatch<AppDispatch>();
   const playbackId = params?.playbackId as string;
-  const { assets, loading, error } = useSelector((state: RootState) => state.assets);
-  const { streams, error: streamError } = useSelector((state: RootState) => state.streams);
-  const {stream} = useSelector((state: RootState) => state.streams);
+  const { assets, error } = useSelector((state: RootState) => state.assets);
+  const { streams } = useSelector((state: RootState) => state.streams);
+  const {
+    video: details,
+    loading: detailsLoading,
+    error: detailsError,
+    hasAccess,
+    setHasAccess,
+    markPaid,
+  } = useGetAssetGate(playbackId);
+  console.log(details, detailsLoading, detailsError, hasAccess, setHasAccess, markPaid);
   // State for products
   const [products, setProducts] = useState<any[]>([]);
   const [productsLoading, setProductsLoading] = useState<boolean>(false);
@@ -35,19 +45,20 @@ const PlayerPage = () => {
     dispatch(getAssets());
     dispatch(getAllStreams());
   }, [dispatch]);
+
   useEffect(() => {
     if (streamId) {
-      console.log('streamjjjjjjjjjjjjjId', streamId)
       dispatch(getStreamById(streamId));
     }
-  }, [id, dispatch]);
-  console.log('streamj', stream);
+  }, [streamId, dispatch]);
+  // console.log('streamj', stream);
 
   useEffect(() => {
     if (error) {
       toast.error('Failed to fetch assets: ' + error);
     }
   }, [error]);
+
   const creatorId = user?.wallet?.address;
   // Find the main asset (video) that matches the playbackId from the URL
   const mainAsset = useMemo(() => assets.find((asset) => asset.playbackId === playbackId), [assets, playbackId]);
@@ -85,25 +96,42 @@ const PlayerPage = () => {
     }
   }, [mainAsset]);
 
-  //    ? `${host.includes('localhost') ? 'http' : 'https'}://${host}/view/${playbackId}?streamName=${encodeURIComponent(streamName)}&id=${encodeURIComponent(creatorId)}`
-  if (!mainAsset) {
+  // 1. While fetching video details, show loader
+  if (detailsLoading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <p className="text-lg font-semibold">
-          <ColorRing
-            visible={true}
-            height="100"
-            width="50"
-            ariaLabel="color-ring-loading"
-            wrapperStyle={{}}
-            wrapperClass="color-ring-wrapper"
-            colors={['#3351FF', '#3351FF', '#3351FF', '#3351FF', '#3351FF']}
-          />
-        </p>
+      <div className="flex items-center justify-center flex-col h-screen">
+        <Bars width={40} height={40} color="#3351FF" />
+        <p>Loading Video…</p>
       </div>
     );
   }
 
+  // 2. If there was an error fetching details
+  if (detailsError) {
+    return <div className="text-center text-red-500 mt-10">{detailsError}</div>;
+  }
+
+  // 3. If stream is gated, show gate modal (only after load complete)
+  if (!hasAccess && details?.viewMode !== 'free') {
+    return (
+      <StreamGateModal
+        open={true}
+        onClose={() => router.back()}
+        title="Locked Video"
+        description={`This video requires payment to view.`}
+      >
+        <StreamPayment
+          stream={details as any}
+          onPaid={(addr) => {
+            setHasAccess(true);
+            markPaid(addr);
+          }}
+        />
+      </StreamGateModal>
+    );
+  }
+
+  // 4. Otherwise render the full player page
   return (
     <div className="min-h-screen w-full bg-white">
       <div className="container mx-auto px-4 py-6">
@@ -112,19 +140,17 @@ const PlayerPage = () => {
           <aside className="lg:col-span-3">
             <div className="border rounded-lg p-4">
               <ul className="space-y-3 max-h-[80vh] overflow-y-auto">
-              <h3 className="text-lg font-semibold mb-4">Available Stream</h3>
+                <h3 className="text-lg font-semibold mb-4">Available Stream</h3>
                 {filteredStreams.map((stream) => (
                   <li key={stream.id}>
-                    <button onClick={() => handleSelectVideo(stream.playbackId!)} className="w-full text-left">
-                      <VideoStreamCard
-                        streamName={stream.name}
-                        playbackId={stream.playbackId!}
-                        status={stream.isActive}
-                        creatorId={stream.creatorId?.value || ''}
-                        lastSeen={new Date(stream.lastSeen)}
-                        imageUrl={image1}
-                      />
-                    </button>
+                    <VideoStreamCard
+                      streamName={stream.name}
+                      playbackId={stream.playbackId!}
+                      status={stream.isActive}
+                      creatorId={stream.creatorId?.value || ''}
+                      lastSeen={new Date(stream.lastSeen)}
+                      imageUrl={image1}
+                    />
                   </li>
                 ))}
                 <h3 className="text-lg font-semibold mb-4">Creator Videos</h3>
@@ -149,33 +175,28 @@ const PlayerPage = () => {
           {/* Main Player Area */}
           <main className="col-span-12 lg:col-span-6 flex flex-col space-y-4">
             {/* Video Player Component */}
-            <VideoPlayer playbackId={playbackId} data={stream} />
+            <VideoPlayer playbackId={playbackId} />
+            <h2 className="mt-4 text-xl font-semibold">{details?.assetName}</h2>
 
-            {/* Donation Section */}
-            <div className="p-4 border rounded-md">
-              <h3 className="text-lg font-semibold mb-2">Donate</h3>
+            <div className="mt-3">
+              <h3 className="font-medium mb-2">Donate</h3>
               <div className="flex space-x-4">
-                <button
-                  className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-                  onClick={() => alert('You donated $5!')}
-                >
-                  $5
-                </button>
-                <button
-                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                  onClick={() => alert('You donated $10!')}
-                >
-                  $10
-                </button>
-                <button
-                  className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600"
-                  onClick={() => alert('You donated $20!')}
-                >
-                  $20
-                </button>
+                {details?.donation?.map((amt, i) => {
+                  const colors = ['bg-green-500', 'bg-blue-500', 'bg-purple-500', 'bg-yellow-500'];
+                  return (
+                    <button
+                      key={i}
+                      className={`${colors[i] || 'bg-main-blue'} text-white px-4 py-2 rounded-md
+                         hover:opacity-90 transition-transform transform hover:scale-110 animate-bounce`}
+                      style={{ animationDelay: `${i * 0.2}s` }}
+                      onClick={() => alert(`You donated $${amt}!`)}
+                    >
+                      ${amt}
+                    </button>
+                  );
+                })}
               </div>
             </div>
-
             {/* Product Section */}
             <div className="p-4 border rounded-md">
               <h3 className="text-lg font-semibold mb-2">Products</h3>

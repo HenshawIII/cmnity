@@ -2,6 +2,7 @@ import { getPlaybackInfo } from '@/lib/livepeer';
 import { getSrc } from '@livepeer/react/external';
 import { PlayerLoading } from '@/components/templates/player/player/Player';
 import PlayerWithChat from './PlayerWithChat';
+import { PrivyProvider } from '@privy-io/react-auth';
 
 export default async function PlayerPage({
   params,
@@ -18,6 +19,23 @@ export default async function PlayerPage({
   const src = getSrc(inputSource);
 
   return src ? (
+    // <PrivyProvider
+    //   appId={process.env.NEXT_PUBLIC_USER_PRIVY_ENVIRONMENT_ID ?? ''}
+    //   config={{
+    //     appearance: {
+    //       landingHeader: '',
+    //       loginMessage: 'Welcome to Chainfren TV',
+    //       theme: 'light',
+    //       accentColor: '#3351FF',
+    //       showWalletLoginFirst: false,
+    //       logo: 'https://res.cloudinary.com/dbkthd6ck/image/upload/v1737309623/chainfren_logo_eey39b.png',
+    //     },
+    //     loginMethods: ['email', 'google'],
+    //     embeddedWallets: {
+    //       createOnLogin: 'all-users',
+    //     },
+    //   }}
+    // >
     <PlayerWithChat src={src} title={streamName ?? 'Live Stream'} playbackId={playbackId} id={id} />
   ) : (
     <PlayerLoading>

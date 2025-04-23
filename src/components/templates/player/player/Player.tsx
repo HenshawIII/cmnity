@@ -1,7 +1,9 @@
 'use client';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import * as Player from '@livepeer/react/player';
-import type { Src } from '@livepeer/react';
+import axios from 'axios';
+import { Bars, ColorRing } from 'react-loader-spinner';
+import { toast } from 'sonner';
 import {
   EnterFullscreenIcon,
   ExitFullscreenIcon,
@@ -16,21 +18,21 @@ import {
 } from '@livepeer/react/assets';
 import { Clip } from './Clip';
 import { Settings } from './Settings';
-import { useViewMetrics } from '@/app/hook/useViewerMetrics';
-import { Smile, Gift } from 'lucide-react';
-import Image, { StaticImageData } from 'next/image';
+import { StreamVideoCard } from '@/components/Card/Card';
+import image1 from '@/assets/image1.png';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import { getAssets } from '@/features/assetsAPI';
-import { toast } from 'sonner';
-import { Asset } from '@/interfaces';
-import image1 from '@/assets/image1.png';
-import { StreamVideoCard } from '@/components/Card/Card';
-import axios from 'axios';
-import { ColorRing } from 'react-loader-spinner';
-// import { DonationDialog } from './DonationDialog';
-
-// Assuming your product objects have { id, name, image, price }
+import { useViewMetrics } from '@/app/hook/useViewerMetrics';
+import { useStreamGate } from '@/app/hook/useStreamGate';
+// Types
+import type { Src } from '@livepeer/react';
+import type { StaticImageData } from 'next/image';
+import Image from 'next/image';
+import { Gift, Smile } from 'lucide-react';
+import { StreamGateModal } from './StreamGateModal';
+import { StreamPayment } from './StreamPayment';
+import { useRouter } from 'next/navigation';
 interface Product {
   id: string;
   name: string;
@@ -49,82 +51,15 @@ export function PlayerWithControls({
   playbackId: string;
   id: string;
 }) {
+  const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
-  const [customization, setCustomization] = useState({
-    bgColor: '#ffffff',
-    textColor: '#000000',
-    fontSize: '16',
-  });
   const { viewerMetrics: totalViewers } = useViewMetrics({ playbackId });
-  const [isVerified, setIsVerified] = useState(false);
-  const { assets, loading: assetsLoading, error: assetsError } = useSelector((state: RootState) => state.assets);
+  const { assets, error: assetsError } = useSelector((s: RootState) => s.assets);
   const [products, setProducts] = useState<Product[]>([]);
-  const [productsLoading, setProductsLoading] = useState<boolean>(false);
+  const [productsLoading, setProductsLoading] = useState(false);
   const [productsError, setProductsError] = useState<string | null>(null);
-  const [donationDialogOpen, setDonationDialogOpen] = useState(false);
-  const [donationAmount, setDonationAmount] = useState<number>(0);
-
-  // Instead of alert, define a function to open the donation dialog with the desired amount.
-  const handleDonateClick = (amount: number) => {
-    setDonationAmount(amount);
-    setDonationDialogOpen(true);
-  };
-  // --- Existing assets fetch ---
-  useEffect(() => {
-    dispatch(getAssets());
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (assetsError) {
-      toast.error('Failed to fetch assets: ' + assetsError);
-    }
-  }, [assetsError]);
-  // Memoize the fetchProducts function
-
-  const fetchProducts = useCallback(async () => {
-    if (!id) return;
-
-    setProductsLoading(true);
-    setProductsError(null);
-
-    try {
-      const response = await axios.get(`https://chaintv.onrender.com/api/${id}/products`);
-      setProducts(response.data.product || []);
-      console.log('Products fetched successfully:', response.data.product);
-    } catch (err) {
-      console.error('Error fetching products:', err);
-      setProductsError('Failed to load products. Please try again.');
-      toast.error('Failed to load products. Please try again.');
-    } finally {
-      setProductsLoading(false);
-    }
-  }, [id]);
-
-  // Fetch products when the component mounts or when `id` changes
-  useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
-
-  const filteredAssets = useMemo(() => {
-    return assets.filter((asset: Asset) => !!asset.playbackId && asset.creatorId?.value === id);
-  }, [assets, id]);
-
-  useEffect(() => {
-    const stored = localStorage.getItem('channelCustomization');
-    if (stored) {
-      setCustomization(JSON.parse(stored));
-    }
-  }, []);
-
-  // --- Verification check ---
-  useEffect(() => {
-    const token = localStorage.getItem('viewerToken');
-    if (token) {
-      setIsVerified(true);
-    }
-  }, []);
-
-  // --- Playback URL ---
+  const { stream, loading, error, hasAccess, setHasAccess, markPaid } = useStreamGate(playbackId);
+  const filteredAssets = useMemo(() => assets.filter((a) => !!a.playbackId && a.creatorId?.value === id), [assets, id]);
   const host = process.env.NEXT_PUBLIC_BASE_URL;
   const playbackUrl =
     host && playbackId
@@ -133,52 +68,82 @@ export function PlayerWithControls({
         )}`
       : null;
 
-  const handleCopyLink = async () => {
+  const handleCopyLink = useCallback(async () => {
+    if (!playbackUrl) return toast.error('No playback URL available');
     try {
-      if (playbackUrl && id) {
-        await navigator.clipboard.writeText(playbackUrl);
-        toast.success('Stream link successfully copied!');
-      } else {
-        toast.error('No playback URL available to copy.');
-      }
-    } catch (err) {
-      toast.error('Failed to copy the stream link.');
+      await navigator.clipboard.writeText(playbackUrl);
+      toast.success('Stream link copied!');
+    } catch {
+      toast.error('Failed to copy link.');
     }
-  };
-  // If not verified, show viewer verification UI (unchanged)
-  if (!isVerified) {
+  }, [playbackUrl]);
+
+  useEffect(() => {
+    dispatch(getAssets());
+  }, [dispatch]);
+
+  useEffect(() => {
+    assetsError && toast.error('Failed to fetch assets: ' + assetsError);
+  }, [assetsError]);
+
+  const fetchProducts = useCallback(async () => {
+    if (!id) return;
+    setProductsLoading(true);
+    setProductsError(null);
+    try {
+      const { data } = await axios.get(`https://chaintv.onrender.com/api/${id}/products`);
+      setProducts(data.product || []);
+    } catch (e) {
+      setProductsError('Failed to load products.');
+      toast.error('Failed to load products.');
+    } finally {
+      setProductsLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+  if (loading)
     return (
-      <div
-        className="min-h-screen w-full flex items-center justify-center"
-        style={{
-          backgroundColor: customization.bgColor,
-          color: customization.textColor,
-          fontSize: `${customization.fontSize}px`,
-        }}
-      >
-        <div className="p-8 border rounded shadow-md bg-white">
-          <h2 className="text-xl font-bold mb-4">Viewer Verification</h2>
-          <p className="mb-4">This stream is gated and subscription is required </p>
-          <button
-            onClick={() => setIsVerified(true)}
-            type="submit"
-            className="bg-blue-600 text-white px-4 py-2 rounded"
-          >
-            Proceed to subscribe
-          </button>
-        </div>
+      <div className="flex items-center justify-center flex-col h-screen">
+        <Bars width={40} height={40} color="#3351FF" />
+        <p>Loading stream…</p>
       </div>
+    );
+  if (error) return <div className="text-center text-red-500 mt-10">{error}</div>;
+
+  // 2. If not allowed yet, show gate modal
+  if (!hasAccess && stream?.viewMode !== 'free') {
+    return (
+      <>
+        <StreamGateModal
+          open={!hasAccess}
+          onClose={() => {
+            router.back();
+          }}
+          title="Locked Stream"
+          description={`A one-time fee of $${stream?.amount.toFixed(2)} unlocks access.`}
+        >
+          <StreamPayment
+            stream={stream as any}
+            onPaid={(addr) => {
+              setHasAccess(true);
+              markPaid(addr);
+            }}
+          />
+        </StreamGateModal>
+      </>
     );
   }
 
-  // --- Render UI ---
   return (
     <div
       className="min-h-screen w-full"
       style={{
-        backgroundColor: customization.bgColor,
-        color: customization.textColor,
-        fontSize: `${customization.fontSize}px`,
+        backgroundColor: stream?.bgcolor,
+        color: stream?.color,
+        fontSize: `${stream?.fontSize}px`,
       }}
     >
       <div className="container mx-auto px-4 py-6">
@@ -323,7 +288,7 @@ export function PlayerWithControls({
 
             {/* Title and Viewer Count */}
             <div className="mt-3 flex items-center justify-between">
-              <p className="text-2xl font-semibold text-black">{title}</p>
+              <p className="text-2xl font-semibold capitalize text-black">{title}</p>
               <div className="flex items-center gap-2 text-sm text-gray-500">
                 <svg
                   width="19"
@@ -349,27 +314,19 @@ export function PlayerWithControls({
               <div className="flex  sm:flex-row items-center justify-center sm:items-start sm:space-x-4 mt-4 sm:mt-0">
                 <h1 className="  mb-2 sm:mb-0">Donate</h1>{' '}
                 <div className="flex space-x-4">
-                  <button
-                    className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-transform transform hover:scale-110 animate-bounce"
-                    style={{ animationDelay: '0s' }}
-                    onClick={() => handleDonateClick(5)}
-                  >
-                    $5
-                  </button>
-                  <button
-                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-transform transform hover:scale-110 animate-bounce"
-                    style={{ animationDelay: '0.2s' }}
-                    onClick={() => handleDonateClick(10)}
-                  >
-                    $10
-                  </button>
-                  <button
-                    className="bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600 transition-transform transform hover:scale-110 animate-bounce"
-                    style={{ animationDelay: '0.4s' }}
-                    onClick={() => handleDonateClick(20)}
-                  >
-                    $20
-                  </button>
+                  {stream?.donation?.map((amt, i) => {
+                    const colors = ['bg-green-500', 'bg-blue-500', 'bg-purple-500', 'bg-yellow-500'];
+                    return (
+                      <button
+                        key={i}
+                        className={`${colors[i] || 'bg-main-blue'} text-white px-4 py-2 rounded-md hover:opacity-90 transition-transform transform hover:scale-110 animate-bounce`}
+                        style={{ animationDelay: `${i * 0.2}s` }}
+                        onClick={() => alert(`You donated $${amt}!`)}
+                      >
+                        ${amt}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
               <div>
@@ -386,10 +343,7 @@ export function PlayerWithControls({
             </div>
             <div className="mt-3">
               <p className="text-sm text-[#53525F]">
-                {title} is a thriving web3 community at the intersection of decentralization and innovation. We believe
-                in the power of global collaboration to shape the future of blockchain. Whether you&apos;re a founder,
-                investor, or builder, WAGMI DAO provides the platform to connect, learn, and grow within a vibrant
-                decentralized ecosystem.
+                {stream?.description || `Welcome to ${title} stream! Enjoy the show.`}
               </p>
             </div>
 
@@ -484,13 +438,6 @@ export function PlayerWithControls({
           </div>
         </div>
       </div>
-      {/* <DonationDialog
-        donationAmount={donationAmount}
-        streamTitle={title}
-        creatorAddress={id}
-        open={donationDialogOpen}
-        onOpenChange={setDonationDialogOpen}
-      /> */}
     </div>
   );
 }

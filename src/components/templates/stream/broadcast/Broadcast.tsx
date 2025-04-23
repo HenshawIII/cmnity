@@ -31,11 +31,8 @@ import { useViewMetrics } from '@/app/hook/useViewerMetrics';
 import { UploadAdsAsset } from '@/components/UploadVideoAsset';
 import { IoMdClose } from 'react-icons/io';
 import { usePrivy } from '@privy-io/react-auth';
-import { getStreamById } from '@/features/streamAPI';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '@/store/store';
-import { Root } from 'postcss';
-import { id } from 'ethers/lib/utils';
+import { useGetStreamDetails } from '@/app/hook/useStreamGate';
+import { Bars } from 'react-loader-spinner';
 
 interface Streams {
   streamKey: string;
@@ -51,19 +48,39 @@ export function BroadcastWithControls({ streamName, streamKey, playbackId }: Str
   const host = process.env.NEXT_PUBLIC_BASE_URL;
   const playbackUrl =
     host && playbackId
-      ? `${host.includes('localhost') ? 'http' : 'https'}://${host}/view/${playbackId}?streamName=${encodeURIComponent(streamName)}&id=${encodeURIComponent(creatorId)}`
+      ? `${host.includes('localhost') ? 'http' : 'https'}://${host}/view/${playbackId}` +
+        `?streamName=${encodeURIComponent(streamName)}` +
+        `&id=${encodeURIComponent(creatorId)}`
       : null;
   const router = useRouter();
 
-  // Load customization settings from localStorage or use defaults
+  // Fetch settings from backend
+  const { stream, loading: detailsLoading, error: detailsError } = useGetStreamDetails(playbackId);
+
+  // Local customization state for live updates
   const [customization, setCustomization] = useState({
     bgColor: '#ffffff',
     fontSize: '16',
     textColor: '#000000',
     logo: '',
-    title: streamName || 'WAGMI DAO Web3 Annual Conference | Live 2024',
-    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+    title: streamName || 'Live Stream',
+    description: '',
   });
+
+  // When API returns, initialize customization
+  useEffect(() => {
+    if (stream) {
+      setCustomization({
+        bgColor: stream.bgcolor,
+        textColor: stream.color,
+        fontSize: stream.fontSize,
+        logo: stream.logo,
+        title: stream.streamName,
+        description: stream.description,
+      });
+    }
+  }, [stream]);
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [sessionTime, setSessionTime] = useState('00:00:00');
   const [showChat, setShowChat] = useState(true);
@@ -72,48 +89,33 @@ export function BroadcastWithControls({ streamName, streamKey, playbackId }: Str
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [chatMessages, setChatMessages] = useState([
-    { user: 'Creator', message: "Gm guys, Can you type where you're streaming from...WAGMI", highlight: true },
-    // { user: 'DavidOx', message: 'Lagos, Nigeria 🇳🇬' },
+    { user: 'Creator', message: 'Gm guys, where are you streaming from? WAGMI!', highlight: true },
   ]);
   const [newMessage, setNewMessage] = useState('');
-  const { viewerMetrics } = useViewMetrics({
-    playbackId,
-    refreshInterval: 10000,
-  });
-
-  // Use the viewer count from metrics if available
+  const { viewerMetrics } = useViewMetrics({ playbackId, refreshInterval: 10000 });
   const viewerCount = viewerMetrics?.viewCount || 0;
 
   const startTimeRef = useRef<number>(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [timerStarted, setTimerStarted] = useState(false);
-  // Start/stop timer based on streamStatus
+
+  // Session timer
   useEffect(() => {
-    // Live -> start timer
     if (timerStarted) {
-      const stored = localStorage.getItem('broadcastStart');
-      const start = stored ? Number(stored) : Date.now();
+      const start = localStorage.getItem('broadcastStart')
+        ? Number(localStorage.getItem('broadcastStart'))
+        : Date.now();
       startTimeRef.current = start;
       localStorage.setItem('broadcastStart', start.toString());
       intervalRef.current = setInterval(() => {
         const delta = Date.now() - startTimeRef.current;
-        const hrs = Math.floor(delta / 3600000)
-          .toString()
-          .padStart(2, '0');
-        const mins = Math.floor((delta % 3600000) / 60000)
-          .toString()
-          .padStart(2, '0');
-        const secs = Math.floor((delta % 60000) / 1000)
-          .toString()
-          .padStart(2, '0');
+        const hrs = String(Math.floor(delta / 3600000)).padStart(2, '0');
+        const mins = String(Math.floor((delta % 3600000) / 60000)).padStart(2, '0');
+        const secs = String(Math.floor((delta % 60000) / 1000)).padStart(2, '0');
         setSessionTime(`${hrs}:${mins}:${secs}`);
       }, 1000);
     } else {
-      // Not live -> clear
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
+      if (intervalRef.current) clearInterval(intervalRef.current);
       localStorage.removeItem('broadcastStart');
       setSessionTime('00:00:00');
     }
@@ -122,49 +124,33 @@ export function BroadcastWithControls({ streamName, streamKey, playbackId }: Str
     };
   }, [timerStarted]);
 
-  useEffect(() => {
-    const stored = localStorage.getItem('channelCustomization');
-    if (stored) {
-      setCustomization(JSON.parse(stored));
-    }
-  }, []);
-
+  // Copy link
   const handleCopyLink = async () => {
     try {
       if (playbackUrl && creatorId) {
         await navigator.clipboard.writeText(playbackUrl);
-        toast.success('Stream link successfully copied!');
+        toast.success('Stream link copied!');
       } else {
-        toast.error('No playback URL available to copy.');
+        toast.error('No link to copy');
       }
-    } catch (err) {
-      toast.error('Failed to copy the stream link.');
+    } catch {
+      toast.error('Failed to copy');
     }
   };
 
-  const handleStartStream = () => {
-    setTimerStarted(true);
-  };
-  const toggleSidebar = () => {
-    setSidebarCollapsed(!sidebarCollapsed);
-  };
-
-  const toggleMobileMenu = () => {
-    setMobileMenuOpen(!mobileMenuOpen);
-  };
-
+  const handleStartStream = () => setTimerStarted(true);
+  const toggleSidebar = () => setSidebarCollapsed((sidebar) => !sidebar);
+  const toggleMobileMenu = () => setMobileMenuOpen((menu) => !menu);
   const toggleChat = () => {
     setShowChat(true);
     setShowInfo(false);
     setShowAds(false);
   };
-
   const toggleInfo = () => {
     setShowInfo(true);
     setShowChat(false);
     setShowAds(false);
   };
-
   const toggleAds = () => {
     setShowAds(true);
     setShowChat(false);
@@ -173,12 +159,22 @@ export function BroadcastWithControls({ streamName, streamKey, playbackId }: Str
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    if (newMessage.trim()) {
-      setChatMessages([...chatMessages, { user: 'You', message: newMessage, highlight: false }]);
-      setNewMessage('');
-    }
+    if (!newMessage.trim()) return;
+    setChatMessages((msgs) => [...msgs, { user: 'You', message: newMessage, highlight: false }]);
+    setNewMessage('');
   };
 
+  if (detailsLoading) {
+    return (
+      <div className="flex items-center justify-center flex-col h-full">
+        <Bars width={25} height={25} color="#3351FF" />
+        <p className="pt-3">Loading settings…</p>
+      </div>
+    );
+  }
+  if (detailsError) {
+    return <div className="flex items-center justify-center h-screen text-red-500">Error: {detailsError}</div>;
+  }
   return (
     <Broadcast.Root
       onError={(error) =>
@@ -232,15 +228,16 @@ export function BroadcastWithControls({ streamName, streamKey, playbackId }: Str
               </button>
               <div className="px-10">
                 <CustomizeChannelDialog
-                  initialValues={customization}
-                  onSave={(newSettings) =>
-                    setCustomization({
-                      ...newSettings,
-                      logo: newSettings.logo ?? '',
-                      title: newSettings.title,
-                      description: newSettings.description,
-                    })
-                  }
+                  playbackId={playbackId}
+                  initialValues={{
+                    bgColor: customization.bgColor,
+                    textColor: customization.textColor,
+                    fontSize: customization.fontSize,
+                    title: customization.title,
+                    description: customization.description,
+                    logo: customization.logo,
+                  }}
+                  onSave={(updated) => setCustomization(updated)}
                 />
               </div>
             </div>
@@ -308,16 +305,19 @@ export function BroadcastWithControls({ streamName, streamKey, playbackId }: Str
               className=" w-full col-span-8 h-full flex flex-col overflow-y-auto"
             >
               <div className={`w-full border-l border-border-gray ${customization.bgColor} h-full`}>
-                <div className="flex justify-center items-center w-full h-20 rounded-full ">
-                  {/* <div></div> */}
-                  <Image
-                    src={customization.logo}
-                    alt="logo"
-                    width={80}
-                    height={100}
-                    objectFit="cover"
-                    className="rounded-full p-2  "
-                  />
+                <div className="flex justify-center items-center w-full h-20">
+                  {customization.logo && (
+                    <div className="w-20 h-20 rounded-full overflow-hidden border mb-2 border-gray-300 flex items-center justify-center">
+                      <Image
+                        src={customization.logo}
+                        alt="logo"
+                        width={60}
+                        height={60}
+                        style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+                        className="rounded-full"
+                      />
+                    </div>
+                  )}
                 </div>
                 <div className="relative flex-grow">
                   <BroadcastContainer />
@@ -333,7 +333,7 @@ export function BroadcastWithControls({ streamName, streamKey, playbackId }: Str
                       </button>
                     </div>
                     <div className="flex items-center gap-x-3">
-                      <Settings className="w-7 h-7 transition-all flex-shrink-0 text-black-primary-text hover:scale-110" />
+                      {/* <Settings className="w-7 h-7 transition-all flex-shrink-0 text-black-primary-text hover:scale-110" /> */}
                       <button
                         className="flex rounded-md bg-background-gray md:h-[33px]  items-center px-3"
                         onClick={handleCopyLink}
@@ -418,7 +418,7 @@ export function BroadcastWithControls({ streamName, streamKey, playbackId }: Str
                           <input
                             value={customization.title}
                             disabled
-                            className="w-full text-sm outline-none border bg-transparent p-3 text-black-secondary-text border-[#c2c2c2] rounded-md font-medium select-none"
+                            className="w-full text-sm outline-none border bg-transparent capitalize p-3 text-black-secondary-text border-[#c2c2c2] rounded-md font-medium select-none"
                           />
                         </div>
                         <div className="flex flex-col gap-y-2">
@@ -427,7 +427,7 @@ export function BroadcastWithControls({ streamName, streamKey, playbackId }: Str
                             value={customization.description}
                             disabled
                             rows={2}
-                            className="w-full text-sm outline-none border bg-transparent line-clamp-4 p-3 text-black-secondary-text border-[#c2c2c2] rounded-md font-medium select-none overflow-y-auto"
+                            className="w-full text-sm outline-none border  bg-transparent line-clamp-4 p-3 text-black-secondary-text border-[#c2c2c2] rounded-md font-medium select-none overflow-y-auto"
                           />
                         </div>
                       </div>
@@ -474,7 +474,7 @@ export function BroadcastWithControls({ streamName, streamKey, playbackId }: Str
                         <input
                           value={customization.title}
                           disabled
-                          className="w-full text-sm outline-none border bg-transparent p-3 text-black-secondary-text border-[#c2c2c2] rounded-md font-medium select-none"
+                          className="w-full text-sm outline-none capitalize border bg-transparent p-3 text-black-secondary-text border-[#c2c2c2] rounded-md font-medium select-none"
                         />
                       </div>
                       <div className="flex flex-col gap-y-2">
@@ -494,7 +494,6 @@ export function BroadcastWithControls({ streamName, streamKey, playbackId }: Str
                       <h3 className="font-medium">Ads</h3>
                       <div className="flex items-center space-x-2">
                         <button className="text-sm bg-gray-200 px-3 py-1 rounded-md">Edit</button>
-                        <button className="text-sm bg-gray-200 px-3 py-1 rounded-md">Preset</button>
                       </div>
                     </div>
                     <div className="p-4">

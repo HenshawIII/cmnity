@@ -102,10 +102,7 @@ export function CreateLivestream({ close }: CreateLivestreamProps) {
       newErrors.channelDescription = 'Required';
     } else {
       // Enforce max 50 words
-      const words = formData.channelDescription
-        .trim()
-        .split(/\s+/)
-        .filter(Boolean);
+      const words = formData.channelDescription.trim().split(/\s+/).filter(Boolean);
       if (words.length < 50) {
         newErrors.channelDescription = 'Description must be 50 words or above';
       }
@@ -269,15 +266,9 @@ export function CreateLivestream({ close }: CreateLivestreamProps) {
           />
           {/* live word count */}
           <p className="text-xs text-gray-500 mt-1">
-            {formData.channelDescription
-              .trim()
-              .split(/\s+/)
-              .filter(Boolean).length}{' '}
-            / 50 words
+            {formData.channelDescription.trim().split(/\s+/).filter(Boolean).length} / 50 words
           </p>
-          {errors.channelDescription && (
-            <p className="text-red-500 text-xs">{errors.channelDescription}</p>
-          )}
+          {errors.channelDescription && <p className="text-red-500 text-xs">{errors.channelDescription}</p>}
         </div>
         <div className="flex flex-col">
           <label className="text-sm pb-1 font-medium text-black">Donation Presets</label>
