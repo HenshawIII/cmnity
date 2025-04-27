@@ -56,21 +56,7 @@ export const createLivestream = createAsyncThunk(
 
       const { playbackId, name } = response.data;
 
-      // Step 2: Send the response data to another endpoint
-      // const data = {
-      //   playbackId,
-      //   viewMode,
-      //   description,
-      //   amount,
-      //   streamName: name || streamName,
-      //   creatorId,
-      //   logo,
-      //   bgColor,
-      //   color,
-      //   fontSize,
-      //   donation,
-      // };
-      // console.log('Data to be sent:', data);
+      // Step 2: Send additional data to the second endpoint
       const secondResponse = await axios.post(`https://chaintv.onrender.com/api/streams/addstream`, {
         playbackId,
         viewMode,
@@ -85,13 +71,11 @@ export const createLivestream = createAsyncThunk(
         fontSize,
         donation,
       });
-      if (secondResponse.status === 200) {
-        // console.log('Data sent successfully:', data);
-      } else if (secondResponse.status !== 200) {
-        console.error('Error sending data:', secondResponse.data);
-      } else {
-        console.error('Unexpected response:', secondResponse);
+
+      if (secondResponse.status !== 200) {
+        throw new Error('Failed to send data to the second endpoint');
       }
+
       return response.data;
     } catch (error: any) {
       console.log('Error creating livestream:', error);
@@ -117,7 +101,7 @@ export const getStreamById = createAsyncThunk('streams/getStreamById', async (id
 
 export const updateLivestream = createAsyncThunk(
   'streams/updateStream',
-  async ({ id, record, creatorId, name }: UpdateLivestreamProps) => {
+  async ({ id, record, name }: UpdateLivestreamProps) => {
     const response = await api.patch(`/stream/${id}`, {
       name: name,
       record,

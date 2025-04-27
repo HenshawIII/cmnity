@@ -141,9 +141,9 @@ const PlayerPage = () => {
           <aside className="lg:col-span-3">
             <div className="border rounded-lg p-4">
               <ul className="space-y-3 max-h-[80vh] overflow-y-auto">
-                <h3 className="text-lg font-semibold mb-4">Available Stream</h3>
                 {filteredStreams.map((stream) => (
                   <li key={stream.id}>
+                    <h3 className="text-lg font-semibold mb-4">Available Stream</h3>
                     <VideoStreamCard
                       streamName={stream.name}
                       playbackId={stream.playbackId!}

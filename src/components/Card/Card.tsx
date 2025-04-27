@@ -24,7 +24,7 @@ interface VideoStreamCardProps {
   status: boolean; // true means Live; false means Idle
 }
 // Analytic Card
-export const AnalyticCard = ({ title, views, change, value, playtimeMins, loading }: AnalyticCardProps) => {
+export const AnalyticCard = ({ title, views, value, playtimeMins, loading }: AnalyticCardProps) => {
   return (
     <div className="w-full h-full flex flex-col">
       <div className="border flex flex-col justify-between bg-background-gray border-border-gray rounded-lg p-4 gap-y-5 h-full">
@@ -43,7 +43,7 @@ export const AnalyticCard = ({ title, views, change, value, playtimeMins, loadin
             <p className="text-xs flex items-center gap-1">
               <span className="text-black-secondary-text">{value}</span>
               <span>
-                {value < 0 ? (
+                {(value ?? 0) < 0 ? (
                   <BiSolidDownArrow className="text-orange-drop text-xs" />
                 ) : (
                   <BiSolidUpArrow className="text-green-drop text-xs" />

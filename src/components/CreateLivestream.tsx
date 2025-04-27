@@ -17,14 +17,14 @@ import { AppDispatch, RootState } from '@/store/store';
  */
 type viewMode = 'free' | 'one-time' | 'monthly';
 
-interface CreateLivestreamProps {
-  close: () => void;
-}
+// interface CreateLivestreamProps {
+//   close: () => void;
+// }
 
-export function CreateLivestream({ close }: CreateLivestreamProps) {
+export function CreateLivestream({ close }: { close: () => void }) {
   const { user } = usePrivy();
   const dispatch = useDispatch<AppDispatch>();
-  const { loading, error, success } = useSelector((state: RootState) => state.streams);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     streamName: '',
     record: false,
@@ -98,17 +98,18 @@ export function CreateLivestream({ close }: CreateLivestreamProps) {
     if (formData.viewMode !== 'free' && (!formData.amount || formData.amount <= 0)) {
       newErrors.amount = 'Invalid amount';
     }
-    const word = formData.channelDescription.trim()
+    const word = formData.channelDescription.trim();
     if (!word) {
-      newErrors.channelDescription = 'Required'
+      newErrors.channelDescription = 'Required';
     } else if (word.length < 20) {
-      newErrors.channelDescription = 'Description must be at least 20 characters'
+      newErrors.channelDescription = 'Description must be at least 20 characters';
     }
 
     if (Object.keys(newErrors).length) {
       setErrors(newErrors);
       return;
     }
+    setIsSubmitting(true);
     console.log('formData', formData);
     try {
       const payload = {
@@ -132,8 +133,10 @@ export function CreateLivestream({ close }: CreateLivestreamProps) {
       close();
     } catch (err: any) {
       console.error(err);
-      toast.error(err.message || 'Failed to create');
+      toast.error(err.message || 'Failed to create stream');
       dispatch(resetStreamStatus());
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -262,12 +265,8 @@ export function CreateLivestream({ close }: CreateLivestreamProps) {
             })}
           />
           {/* live word count */}
-          <p className="text-xs text-gray-500 mt-1">
-            {formData.channelDescription.trim().length} / 50 characters
-          </p>
-          {errors.channelDescription && (
-            <p className="text-red-500 text-xs">{errors.channelDescription}</p>
-          )}
+          <p className="text-xs text-gray-500 mt-1">{formData.channelDescription.trim().length} / 50 characters</p>
+          {errors.channelDescription && <p className="text-red-500 text-xs">{errors.channelDescription}</p>}
         </div>
         <div className="flex flex-col">
           <label className="text-sm pb-1 font-medium text-black">Donation Presets</label>
@@ -359,9 +358,9 @@ export function CreateLivestream({ close }: CreateLivestreamProps) {
           <button
             type="submit"
             className="flex items-center justify-center w-32 p-2 border rounded bg-main-blue text-white transition duration-200 disabled:opacity-50"
-            disabled={loading}
+            disabled={isSubmitting}
           >
-            {loading ? (
+            {isSubmitting ? (
               <RotatingLines
                 visible={true}
                 strokeWidth="5"

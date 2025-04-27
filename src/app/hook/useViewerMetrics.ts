@@ -19,7 +19,7 @@ interface ViewMetrics {
   errorRate?: number;
   exitsBeforeStart?: number;
 }
-// Total views the particulat asset has asset has
+// To get the view metrics for a specific playbackId, assetId, or streamId or overall when no filter param is passed
 export const useViewerMetrics = ({
   playbackId,
   assetId,
@@ -30,7 +30,7 @@ export const useViewerMetrics = ({
   const { user } = usePrivy();
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [viewMetrics, setViewMetrics] = useState<ViewMetrics | null>(null);
+  const [viewMetrics, setViewMetrics] = useState<ViewMetrics>();
 
   // Memoized fetch function
   const fetchViewerMetrics = useCallback(async () => {
@@ -108,6 +108,7 @@ interface ViewerMetrics {
   errorRate: number;
 }
 
+// Currently this is used to get the current view count and error rate for a specific playbackId
 export const useViewMetrics = ({ playbackId, refreshInterval = 5000 }: ViewMetricProps) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);

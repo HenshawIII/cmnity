@@ -3,8 +3,8 @@ import { StaticImageData } from 'next/image';
 export interface AnalyticCardProps {
   title: string;
   views?: number | string;
-  value: number;
-  change: string;
+  value?: number;
+  change?: string;
   playtimeMins?: string;
   loading?: boolean;
 }

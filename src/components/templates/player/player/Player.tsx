@@ -83,7 +83,9 @@ export function PlayerWithControls({
   }, [dispatch]);
 
   useEffect(() => {
-    if (assetsError) {toast.error('Failed to fetch assets: ' + assetsError);}
+    if (assetsError) {
+      toast.error('Failed to fetch assets: ' + assetsError);
+    }
   }, [assetsError]);
 
   const fetchProducts = useCallback(async () => {
@@ -117,11 +119,7 @@ export function PlayerWithControls({
 
   // 2. Error state
   if (error) {
-    return (
-      <div className="text-center text-red-500 mt-10">
-        {error}
-      </div>
-    );
+    return <div className="text-center text-red-500 mt-10">{error}</div>;
   }
 
   // 3. If not allowed yet, show gate modal
