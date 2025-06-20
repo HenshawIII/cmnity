@@ -39,7 +39,7 @@ const Header = ({ toggleMenu, mobileOpen }: { toggleMenu: () => void; mobileOpen
           solanaWalletObj = await createWallet();
           toast.success('Solana wallet created successfully');
         } catch (error) {
-          toast.error('Failed to create Solana wallet');
+          // toast.error('Failed to create Solana wallet');
         } finally {
           setLoading(false);
         }

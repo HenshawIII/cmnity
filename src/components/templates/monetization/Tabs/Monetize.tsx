@@ -5,12 +5,12 @@ import Lefi from '../../../../assets/Lefi.png';
 import { AiOutlineExclamationCircle } from 'react-icons/ai';
 import { useState } from 'react';
 import Image from 'next/image';
-import { useEthBalance } from '@/app/providers';
+// import { useEthBalance } from '@/app/providers';
 import SendTransaction from '@/components/SendTransaction';
 import { usePrivy } from '@privy-io/react-auth';
 const Monetize = () => {
   const { sendTransaction: send } = usePrivy();
-  const { ethBalance } = useEthBalance();
+  // const { ethBalance } = useEthBalance();
   const [showPayment, setShowPayment] = useState(false);
   const [withdrawalAmount, setWithdrawalAmount] = useState('');
   const [withdrawalAddress, setWithdrawalAddress] = useState('');
@@ -34,7 +34,7 @@ const Monetize = () => {
               <p className="text-xl font-normal">Wallet Balance</p>
               <button className="text-gray-400 text-sm">History</button>
             </div>
-            <p className="text-xl py-4 px-3 font-semibold">{ethBalance ? `${ethBalance} ETH` : '***'}</p>
+            {/* <p className="text-xl py-4 px-3 font-semibold">{ethBalance ? `${ethBalance} ETH` : '***'}</p> */}
             {/* <p className="text-xs text-gray-400 pt-2  px-3 self-end">{chainName?.split(' ')[0]}</p> */}
           </div>
           <div className="mt-6">
