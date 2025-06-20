@@ -24,11 +24,12 @@ type viewMode = 'free' | 'one-time' | 'monthly';
 export function CreateLivestream({ close }: { close: () => void }) {
   const { user } = usePrivy();
   const dispatch = useDispatch<AppDispatch>();
+  const solanaWalletAddress = useSelector((state: RootState) => state.user.solanaWalletAddress);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     streamName: '',
     record: false,
-    creatorId: user?.wallet?.address || '',
+    creatorId: user?.wallet?.chainType === 'solana' ? user.wallet.address : solanaWalletAddress || '',
     viewMode: 'free' as viewMode,
     amount: 0,
     channelDescription: '',
@@ -42,8 +43,9 @@ export function CreateLivestream({ close }: { close: () => void }) {
   const [presetValues, setPresetValues] = useState<number[]>([0, 0, 0, 0]);
   // keep creatorId in sync
   useEffect(() => {
-    setFormData((prev) => ({ ...prev, creatorId: user?.wallet?.address || '' }));
-  }, [user?.wallet?.address]);
+    const newCreatorId = user?.wallet?.chainType === 'solana' ? user.wallet.address : solanaWalletAddress || '';
+    setFormData((prev) => ({ ...prev, creatorId: newCreatorId }));
+  }, [user?.wallet, solanaWalletAddress]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;

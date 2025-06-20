@@ -16,6 +16,8 @@ import { toast } from 'sonner';
 import { Avatar as Avater, Identity, Name, Badge, Address } from '@coinbase/onchainkit/identity';
 import { Menu, X } from 'lucide-react';
 import clsx from 'clsx';
+import { useDispatch } from 'react-redux';
+import { setSolanaWalletAddress } from '@/features/userSlice';
 
 const Header = ({ toggleMenu, mobileOpen }: { toggleMenu: () => void; mobileOpen: boolean }) => {
   const navigate = useRouter();
@@ -24,6 +26,7 @@ const Header = ({ toggleMenu, mobileOpen }: { toggleMenu: () => void; mobileOpen
   const [solanaWallet, setSolanaWallet] = useState<string>('');
   const [showDialog, setShowDialog] = useState(false);
   const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
 
   // Auto-create Solana wallet on login/ready
   useEffect(() => {
@@ -43,10 +46,11 @@ const Header = ({ toggleMenu, mobileOpen }: { toggleMenu: () => void; mobileOpen
       }
       if (solanaWalletObj) {
         setSolanaWallet(solanaWalletObj.address);
+        dispatch(setSolanaWalletAddress(solanaWalletObj.address));
       }
     }
     setUp();
-  }, [ready, solana, user, createWallet]);
+  }, [ready, solana, user, createWallet, dispatch]);
 
   const { logout: handleLogout } = useLogout({
     onSuccess: () => {
@@ -76,10 +80,13 @@ const Header = ({ toggleMenu, mobileOpen }: { toggleMenu: () => void; mobileOpen
             <DropdownMenu.Root>
               <DropdownMenu.Trigger asChild>
                 <div className="flex items-center gap-2">
-                  {ready && solanaWallet ? (
-                    <span className="text-main-blue font-semibold">{solanaWallet.slice(0, 6)}...{solanaWallet.slice(-4)}</span>
+                  {ready && (user?.wallet?.chainType === 'solana' || solanaWallet) ? (
+                    <span className="text-main-blue font-semibold">
+                      {(user?.wallet?.chainType === 'solana' ? user.wallet.address : solanaWallet).slice(0, 6)}...
+                      {(user?.wallet?.chainType === 'solana' ? user.wallet.address : solanaWallet).slice(-4)}
+                    </span>
                   ) : (
-                    <p className="text-gray-500">{ready && !solanaWallet && 'No wallet connected'}</p>
+                    <p className="text-gray-500">{ready && 'No wallet connected'}</p>
                   )}
                 </div>
               </DropdownMenu.Trigger>

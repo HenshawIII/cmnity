@@ -6,6 +6,8 @@ import { Bars } from 'react-loader-spinner';
 import axios from 'axios';
 import InputField from '@/components/ui/InputField';
 import { Copy, ExternalLink } from 'lucide-react';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/store/store';
 
 interface ProfileData {
   displayName: string;
@@ -27,6 +29,7 @@ interface ProfileData {
 
 export function ProfileCustomization() {
   const { user } = usePrivy();
+  const solanaWalletAddress = useSelector((state: RootState) => state.user.solanaWalletAddress);
   const [profileData, setProfileData] = useState<ProfileData>({
     displayName: '',
     bio: '',
@@ -74,11 +77,12 @@ export function ProfileCustomization() {
 
   // Generate profile URL
   useEffect(() => {
-    if (user?.wallet?.address) {
+    const creatorAddress = user?.wallet?.chainType === 'solana' ? user.wallet.address : solanaWalletAddress;
+    if (creatorAddress) {
       const host = process.env.NEXT_PUBLIC_BASE_URL || window.location.origin;
-      setProfileUrl(`${host}/creator/${user.wallet.address}`);
+      setProfileUrl(`${host}/creator/${creatorAddress}`);
     }
-  }, [user?.wallet?.address]);
+  }, [user?.wallet, solanaWalletAddress]);
 
   const handleInputChange = (field: string, value: string) => {
     setProfileData(prev => ({
