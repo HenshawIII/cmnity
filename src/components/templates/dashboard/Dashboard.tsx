@@ -57,7 +57,7 @@ const Dashboard = () => {
   }, [ready, authenticated, navigate]);
 
   const filteredStreams = useMemo(() => {
-    return streams.filter((stream: Stream) => !!stream.playbackId && stream.creatorId?.value === user?.wallet?.address);
+    return streams.filter((stream) => !!stream.playbackId && stream.creatorId?.value === user?.wallet?.address);
   }, [streams, user?.wallet?.address]);
 
   const filteredAssets = useMemo(() => {
@@ -151,7 +151,7 @@ const Dashboard = () => {
                     streamId={stream.id}
                     playbackId={stream.id}
                     playb={stream.playbackId}
-                    lastSeen={new Date(stream.lastSeen)}
+                    lastSeen={new Date(stream.lastSeen || 0)}
                     status={stream.isActive}
                   />
                 </div>

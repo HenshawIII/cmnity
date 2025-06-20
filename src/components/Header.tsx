@@ -6,14 +6,13 @@ import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { MdOutlineLogout } from 'react-icons/md';
 import { useRouter } from 'next/navigation';
 import * as Dialog from '@radix-ui/react-dialog';
-import { useLogout, usePrivy, useWallets } from '@privy-io/react-auth';
+import { useLogout, usePrivy } from '@privy-io/react-auth';
 import { useSolanaWallets } from '@privy-io/react-auth/solana';
 import { useEffect, useState } from 'react';
 import { FaRegUserCircle, FaWallet, FaGoogle, FaDiscord, FaTwitter } from 'react-icons/fa';
 import { MdEmail } from 'react-icons/md';
 import { IoClose } from 'react-icons/io5';
 import { toast } from 'sonner';
-import { ethers } from 'ethers';
 import { Avatar as Avater, Identity, Name, Badge, Address } from '@coinbase/onchainkit/identity';
 import { Menu, X } from 'lucide-react';
 import clsx from 'clsx';
@@ -21,72 +20,34 @@ import clsx from 'clsx';
 const Header = ({ toggleMenu, mobileOpen }: { toggleMenu: () => void; mobileOpen: boolean }) => {
   const navigate = useRouter();
   const { user, ready } = usePrivy();
-  const { wallets } = useWallets();
   const { wallets: solana, createWallet } = useSolanaWallets();
-  const [walletBalance, setWalletBalance] = useState<string>('');
-  const [embeddedWallet, setEmbeddedWallet] = useState<any>(null);
-  const [solanaWallet, setSolanaWallet] = useState<any>(null);
+  const [solanaWallet, setSolanaWallet] = useState<string>('');
   const [showDialog, setShowDialog] = useState(false);
-
-  // const [solanaWalletBalance, setSolanaWalletBalance] = useState<string>('');
-  useEffect(() => {
-    if (!ready) {
-      return;
-    } else {
-      setUp();
-    }
-    async function setUp() {
-      const embeddedWallet = wallets.find((wallet) => wallet.walletClientType === 'privy');
-
-      if (embeddedWallet) {
-        const provider = await embeddedWallet.getEthereumProvider();
-        const ethProvider = new ethers.providers.Web3Provider(provider);
-        const walletBalance = await ethProvider.getBalance(embeddedWallet.address);
-        const ethStringAmount = ethers.utils.formatEther(walletBalance);
-        setWalletBalance(ethStringAmount);
-        setEmbeddedWallet(embeddedWallet);
-      }
-    }
-  }, [ready, wallets]);
-
-  useEffect(() => {
-    if (!ready) {
-      return;
-    } else {
-      setUp();
-    }
-    async function setUp() {
-      const solanaWallet = solana.find((wallet) => wallet.walletClientType === 'privy');
-      if (solanaWallet) {
-        // const provider = await solanaWallet.getProvider();
-        // const solProvider = new ethers.providers.Web3Provider(provider);
-        // const walletBalance = await solProvider.getBalance(solanaWallet.address);
-        // const solStringAmount = ethers.utils.formatEther(walletBalance);
-        // setSolanaWalletBalance(solStringAmount);
-        setSolanaWallet(solanaWallet.address);
-      }
-    }
-  }, [ready, solana]);
   const [loading, setLoading] = useState(false);
-  // Handler for creating the Solana wallet.
-  const handleCreateSolanaWallet = async () => {
-    if (!user) {
-      toast.error('Please login first');
-      return;
+
+  // Auto-create Solana wallet on login/ready
+  useEffect(() => {
+    if (!ready || !user) return;
+    async function setUp() {
+      let solanaWalletObj: { address: string } | undefined = solana.find((wallet) => wallet.walletClientType === 'privy');
+      if (!solanaWalletObj) {
+        try {
+          setLoading(true);
+          solanaWalletObj = await createWallet();
+          toast.success('Solana wallet created successfully');
+        } catch (error) {
+          toast.error('Failed to create Solana wallet');
+        } finally {
+          setLoading(false);
+        }
+      }
+      if (solanaWalletObj) {
+        setSolanaWallet(solanaWalletObj.address);
+      }
     }
-    setLoading(true);
-    try {
-      const wallet = await createWallet();
-      setSolanaWallet(wallet);
-      toast.success('Solana wallet created successfully', {
-        description: 'Your Solana wallet has been created.',
-      });
-    } catch (error) {
-      toast.error('Failed to create Solana wallet');
-    } finally {
-      setLoading(false);
-    }
-  };
+    setUp();
+  }, [ready, solana, user, createWallet]);
+
   const { logout: handleLogout } = useLogout({
     onSuccess: () => {
       toast.success('Successfully logged out');
@@ -94,9 +55,7 @@ const Header = ({ toggleMenu, mobileOpen }: { toggleMenu: () => void; mobileOpen
     },
   });
   const [showWallets, setShowWallets] = useState(false);
-  // const handleclick = ()=>{
-  //       // alert('clicked')
-  // }
+
   return (
     <>
       <header
@@ -117,20 +76,10 @@ const Header = ({ toggleMenu, mobileOpen }: { toggleMenu: () => void; mobileOpen
             <DropdownMenu.Root>
               <DropdownMenu.Trigger asChild>
                 <div className="flex items-center gap-2">
-                  {ready && embeddedWallet?.address ? (
-                    <Identity
-                      address={embeddedWallet.address}
-                      hasCopyAddressOnClick={true}
-                      schemaId="0xf8b05c79f090979bf4a80270aba232dff11a10d9ca55c4f88de95317970f0de9"
-                    >
-                      <Avater />
-                      <Address />
-                      <Name>
-                        <Badge />
-                      </Name>
-                    </Identity>
+                  {ready && solanaWallet ? (
+                    <span className="text-main-blue font-semibold">{solanaWallet.slice(0, 6)}...{solanaWallet.slice(-4)}</span>
                   ) : (
-                    <p className="text-gray-500">{ready && !embeddedWallet && 'No wallet connected'}</p>
+                    <p className="text-gray-500">{ready && !solanaWallet && 'No wallet connected'}</p>
                   )}
                 </div>
               </DropdownMenu.Trigger>
@@ -171,35 +120,31 @@ const Header = ({ toggleMenu, mobileOpen }: { toggleMenu: () => void; mobileOpen
                     <Dialog.Title className="text-2xl font-semibold border-b pb-4 mb-4">Profile Details</Dialog.Title>
                     {/* Profile Details Content */}
                     <div className="grid fex flex-col grid-cols-2  lg:grid-cols-3 gap-4">
-                      {/* Wallet Details Toggle */}
+                      {/* Solana Wallet Only */}
                       <div className="col-span-2 lg:col-span-3">
                         <div className="flex justify-between items-center">
-                          <span className="text-sm font-semibold">
-                            <span className="text-main-blue text-base">Wallet Balance:</span>{' '}
-                            {walletBalance ? `${walletBalance} ETH` : 'N/A'}
-                          </span>
+                          <span className="text-main-blue text-base">Solana Wallet Address:</span>
                           <button
                             onClick={() => setShowWallets((prev) => !prev)}
                             className="px-3 py-1 border rounded text-sm"
                           >
-                            {showWallets ? 'Hide Wallets' : 'Show Wallets'}
+                            {showWallets ? 'Hide Wallet' : 'Show Wallet'}
                           </button>
                         </div>
                         {showWallets && (
                           <div className="mt-4 space-y-4">
-                            {/* Ethereum Wallet */}
                             <div className="flex flex-col">
-                              <span className="text-main-blue text-base">Ethereum Wallet Address:</span>
+                              <span className="text-main-blue text-base">Solana Wallet Address:</span>
                               <div className="flex items-center gap-2 mt-1">
                                 <input
                                   type="text"
                                   readOnly
-                                  value={embeddedWallet?.address || ''}
+                                  value={solanaWallet || ''}
                                   className="border rounded-lg px-4 py-2 w-full"
                                 />
                                 <button
                                   onClick={() => {
-                                    navigator.clipboard.writeText(embeddedWallet?.address || '');
+                                    navigator.clipboard.writeText(solanaWallet || '');
                                     toast.success('Copied to clipboard');
                                   }}
                                   className="px-2 py-1 bg-main-blue text-white rounded-lg hover:bg-blue-600 transition-colors"
@@ -207,38 +152,6 @@ const Header = ({ toggleMenu, mobileOpen }: { toggleMenu: () => void; mobileOpen
                                   Copy
                                 </button>
                               </div>
-                            </div>
-                            {/* Solana Wallet / Create */}
-                            <div className="flex flex-col">
-                              {solanaWallet ? (
-                                <>
-                                  <span className="text-main-blue text-base">Solana Wallet Address:</span>
-                                  <div className="flex items-center gap-2 mt-1">
-                                    <input
-                                      type="text"
-                                      readOnly
-                                      value={solanaWallet}
-                                      className="border rounded-lg px-4 py-2 w-full"
-                                    />
-                                    <button
-                                      onClick={() => {
-                                        navigator.clipboard.writeText(solanaWallet || '');
-                                        toast.success('Copied to clipboard');
-                                      }}
-                                      className="px-2 py-1 bg-main-blue text-white rounded-lg hover:bg-blue-600 transition-colors"
-                                    >
-                                      Copy
-                                    </button>
-                                  </div>
-                                </>
-                              ) : (
-                                <button
-                                  onClick={handleCreateSolanaWallet}
-                                  className="px-4 py-3 bg-green-500 hover:bg-green-600 text-white flex justify-center items-center rounded-lg transition-colors"
-                                >
-                                  {loading ? <FaSpinner /> : 'Create Solana Wallet'}
-                                </button>
-                              )}
                             </div>
                           </div>
                         )}
@@ -257,7 +170,7 @@ const Header = ({ toggleMenu, mobileOpen }: { toggleMenu: () => void; mobileOpen
                           <FaWallet className="text-2xl text-main-blue" />
                           <span className="font-medium text-gray-700">Wallet Address</span>
                         </div>
-                        <p className="text-sm text-gray-600 break-words">{user?.wallet?.address || 'Not connected'}</p>
+                        <p className="text-sm text-gray-600 break-words">{solanaWallet || 'Not connected'}</p>
                       </div>
                       {/* Email Card */}
                       <div className="p-4 rounded-lg border border-gray-200 hover:border-blue-500 transition-shadow">

@@ -16,24 +16,24 @@ const Sidebar = ({ sidebarCollapsed }: SidebarProps) => {
   const pathname = usePathname();
   const links = [
     { href: '/dashboard', icon: TbHomeFilled, text: 'Home' },
-    { href: '/dashboard/stream', icon: CiStreamOn, text: 'Stream' },
+    // { href: '/dashboard/stream', icon: CiStreamOn, text: 'Stream' },
     // {
     //   href: '/dashboard/customise-channel',
     //   icon: RiEditFill,
     //   text: 'Customize Channel',
     // },
-    {
-      href: '/dashboard/analytics',
-      icon: BsFillBarChartLineFill,
-      text: 'Analytics',
-    },
+    // {
+    //   href: '/dashboard/analytics',
+    //   icon: BsFillBarChartLineFill,
+    //   text: 'Analytics',
+    // },
 
-    {
-      href: '/dashboard/monetization',
-      icon: FaSackDollar,
-      text: 'Monetization',
-    },
-    { href: '/dashboard/settings', icon: IoSettings, text: 'Settings' },
+    // {
+    //   href: '/dashboard/monetization',
+    //   icon: FaSackDollar,
+    //   text: 'Monetization',
+    // },
+    { href: '/dashboard/settings', icon: IoSettings, text: 'Profile' },
   ];
   return (
     <nav className="w-full mt-2 ">

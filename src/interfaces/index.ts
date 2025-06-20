@@ -40,7 +40,13 @@ export interface Stream {
   playbackId: string;
   streamKey: string;
   createdAt?: Date;
-  creatorId?: { type: string; value: string };
+  creatorId?: {
+    value: string;
+  };
+  lastSeen: number;
+  isActive: boolean;
+  thumbnailUrl?: string;
+  viewerCount?: number;
 }
 
 export interface PopupProps {

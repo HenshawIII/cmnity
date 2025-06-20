@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { Stream } from '@/interfaces';
 import {
   createLivestream,
   getAllStreams,
@@ -7,19 +8,6 @@ import {
   terminateStream,
   updateLivestream,
 } from './streamAPI';
-
-interface Stream {
-  id: string;
-  name: string;
-  isActive: boolean;
-  playbackId: string;
-  streamKey: string;
-  creatorId?: {
-    type: string;
-    value: string;
-  };
-  lastSeen: number;
-}
 
 interface StreamsState {
   streams: Stream[];

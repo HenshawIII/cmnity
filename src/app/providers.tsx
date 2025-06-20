@@ -10,6 +10,9 @@ import { qMainnet, mainnet, metachain, baseSepolia } from 'viem/chains';
 import { defineChain } from 'viem';
 import { OnchainKitProvider } from '@coinbase/onchainkit';
 import { base } from 'wagmi/chains';
+import { toSolanaWalletConnectors } from '@privy-io/react-auth/solana';
+
+
 const EthBalanceContext = createContext<EthBalanceContextType | undefined>(undefined);
 
 export const useEthBalance = () => {
@@ -87,14 +90,17 @@ export default function Providers({ children }: { children: React.ReactNode }) {
           accentColor: '#3351FF',
           showWalletLoginFirst: false,
           logo: 'https://res.cloudinary.com/dbkthd6ck/image/upload/v1737309623/chainfren_logo_eey39b.png',
-          walletList: ['metamask', 'phantom', 'rainbow', 'wallet_connect', 'okx_wallet', 'bybit_wallet'],
+          // showWalletLoginFirst: false,
+          walletChainType:'ethereum-and-solana',
+          walletList: ['metamask', 'phantom','detected_wallets','coinbase_wallet','okx_wallet','rainbow','wallet_connect'],
         },
-        loginMethods: ['email', 'wallet', 'google', 'twitter', 'discord', 'linkedin'],
+        loginMethods: [ 'wallet', 'google',"farcaster" ],
+        supportedChains:[ethereumMainnet],
+        externalWallets: {solana: {connectors: toSolanaWalletConnectors()}},
         embeddedWallets: {
           createOnLogin: 'all-users',
         },
-        defaultChain: ethereumMainnet,
-        supportedChains: [ethereumMainnet, base, qMainnet, mainnet, metachain, baseSepolia],
+        
       }}
     >
       <Provider store={store}>
