@@ -13,70 +13,70 @@ import { base } from 'wagmi/chains';
 import { toSolanaWalletConnectors } from '@privy-io/react-auth/solana';
 
 
-// const EthBalanceContext = createContext<EthBalanceContextType | undefined>(undefined);
+const EthBalanceContext = createContext<EthBalanceContextType | undefined>(undefined);
 
-// export const useEthBalance = () => {
-//   const context = useContext(EthBalanceContext);
-//   if (!context) {
-//     throw new Error('useEthBalance must be used within an EthBalanceProvider');
-//   }
-//   return context;
-// };
+export const useEthBalance = () => {
+  const context = useContext(EthBalanceContext);
+  if (!context) {
+    throw new Error('useEthBalance must be used within an EthBalanceProvider');
+  }
+  return context;
+};
 
-// const EthBalanceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-//   const { ready } = usePrivy();
-//   const { wallets } = useWallets();
-//   const [ethBalance, setEthBalance] = useState('');
-//   const [embeddedWallet, setEmbeddedWallet] = useState<any>(null);
+const EthBalanceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { ready } = usePrivy();
+  const { wallets } = useWallets();
+  const [ethBalance, setEthBalance] = useState('');
+  const [embeddedWallet, setEmbeddedWallet] = useState<any>(null);
 
-//   const refreshBalance = useCallback(async () => {
-//     if (!ready) return;
-//     const wallet = wallets[0];
-//     if (wallet) {
-//       try {
-//         const provider = await wallet.getEthereumProvider();
-//         // Get the current chain id (in hex)
-//         const ethProvider = new ethers.providers.Web3Provider(provider);
-//         const balance = await ethProvider.getBalance(wallet.address);
-//         const formattedBalance = ethers.utils.formatEther(balance);
-//         // console.log('Balance:', formattedBalance);
-//         setEthBalance(formattedBalance);
-//         setEmbeddedWallet(wallet);
-//       } catch (error) {
-//         // console.error('Error refreshing balance:', error);
-//       }
-//     }
-//   }, [ready, wallets]);
+  const refreshBalance = useCallback(async () => {
+    if (!ready) return;
+    const wallet = wallets[0];
+    if (wallet) {
+      try {
+        const provider = await wallet.getEthereumProvider();
+        // Get the current chain id (in hex)
+        const ethProvider = new ethers.providers.Web3Provider(provider);
+        const balance = await ethProvider.getBalance(wallet.address);
+        const formattedBalance = ethers.utils.formatEther(balance);
+        // console.log('Balance:', formattedBalance);
+        setEthBalance(formattedBalance);
+        setEmbeddedWallet(wallet);
+      } catch (error) {
+        // console.error('Error refreshing balance:', error);
+      }
+    }
+  }, [ready, wallets]);
 
-//   useEffect(() => {
-//     refreshBalance();
-//   }, [ready, wallets, refreshBalance]);
+  useEffect(() => {
+    refreshBalance();
+  }, [ready, wallets, refreshBalance]);
 
-//   return (
-//     <EthBalanceContext.Provider value={{ ethBalance, embeddedWallet, refreshBalance }}>
-//       {children}
-//     </EthBalanceContext.Provider>
-//   );
-// };
+  return (
+    <EthBalanceContext.Provider value={{ ethBalance, embeddedWallet, refreshBalance }}>
+      {children}
+    </EthBalanceContext.Provider>
+  );
+};
 
-// export const ethereumMainnet = defineChain({
-//   id: 1, // Ethereum Mainnet chain ID
-//   name: 'Ethereum Mainnet',
-//   network: 'homestead', // This is the network name used for Ethereum Mainnet
-//   nativeCurrency: {
-//     decimals: 18,
-//     name: 'Ether',
-//     symbol: 'ETH',
-//   },
-//   rpcUrls: {
-//     default: {
-//       http: ['https://cloudflare-eth.com'],
-//     },
-//   },
-//   blockExplorers: {
-//     default: { name: 'Etherscan', url: 'https://etherscan.io' },
-//   },
-// });
+export const ethereumMainnet = defineChain({
+  id: 1, // Ethereum Mainnet chain ID
+  name: 'Ethereum Mainnet',
+  network: 'homestead', // This is the network name used for Ethereum Mainnet
+  nativeCurrency: {
+    decimals: 18,
+    name: 'Ether',
+    symbol: 'ETH',
+  },
+  rpcUrls: {
+    default: {
+      http: ['https://cloudflare-eth.com'],
+    },
+  },
+  blockExplorers: {
+    default: { name: 'Etherscan', url: 'https://etherscan.io' },
+  },
+});
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -105,11 +105,11 @@ export default function Providers({ children }: { children: React.ReactNode }) {
           apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
           chain={base} // add baseSepolia for testing
         >
-         
+         <EthBalanceProvider>
             {/* <StreamProvider> */}
             {children}
             {/* </StreamProvider> */}
-         
+            </EthBalanceProvider>
         </OnchainKitProvider>
       </Provider>
     </PrivyProvider>
