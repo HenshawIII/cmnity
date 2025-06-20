@@ -91,11 +91,13 @@ export default function Providers({ children }: { children: React.ReactNode }) {
           showWalletLoginFirst: false,
           logo: 'https://res.cloudinary.com/dbkthd6ck/image/upload/v1737309623/chainfren_logo_eey39b.png',
           // showWalletLoginFirst: false,
-          walletChainType:'solana-only',
+          
           walletList: ['metamask', 'phantom','detected_wallets','coinbase_wallet','okx_wallet','rainbow','wallet_connect'],
         },
         loginMethods: [ 'wallet', 'google',"farcaster" ],
-         externalWallets: {solana: {connectors: toSolanaWalletConnectors()}},
+       
+        defaultChain: ethereumMainnet,
+        supportedChains: [ethereumMainnet, base, qMainnet, mainnet, metachain, baseSepolia],
        
         
       }}
