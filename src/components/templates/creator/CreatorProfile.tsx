@@ -117,7 +117,7 @@ export function CreatorProfile({ creatorId }: CreatorProfileProps) {
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
           <h2 className="text-2xl font-bold mb-4">Creator Not Found</h2>
-          <p className="text-gray-600">This creator profile doesn't exist or is private.</p>
+          <p className="text-gray-600">This creator profile does not exist or is private.</p>
         </div>
       </div>
     );
