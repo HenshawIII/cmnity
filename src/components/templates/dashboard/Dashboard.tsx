@@ -26,13 +26,17 @@ const Dashboard = () => {
   const { user, ready, authenticated } = usePrivy();
   const navigate = useRouter();
   const dispatch = useDispatch<AppDispatch>();
-  const solanaWalletAddress = useSelector((state: RootState) => state.user.solanaWalletAddress);
+  const solanaWalletAddress =
+    user?.wallet?.chainType === 'solana' && user?.wallet?.address
+      ? user.wallet.address 
+      : useSelector((state: RootState) => state.user.solanaWalletAddress);
   const { streams, loading: streamsLoading, error: streamsError } = useSelector((state: RootState) => state.streams);
   const { assets, loading: assetsLoading, error: assetsError } = useSelector((state: RootState) => state.assets);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDialogOpen2, setIsDialogOpen2] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  // const [filteredStreams, setFilteredStreams] = useState<Stream[]>([]);
 
   useEffect(() => {
     
@@ -61,10 +65,24 @@ const Dashboard = () => {
     }
   }, [ready, authenticated, navigate]);
 
-  const filteredStreams = useMemo(() => {
-    return streams.filter((stream) => !!stream.playbackId && stream.creatorId?.value === solanaWalletAddress);
-  }, [streams, solanaWalletAddress]);
+  // useEffect(() => {
+  //   // const userAddress = user?.wallet?.address?.toLowerCase().trim();
+  //   console.log(solanaWalletAddress);
+  //   const filtered = streams.filter(
+  //     (stream) =>
+  //       !!stream.playbackId &&
+  //       stream.creatorId?.value?.toLowerCase().trim() === solanaWalletAddress
+  //   );
+  //   setFilteredStreams(filtered);
+  // }, [streams, solanaWalletAddress]);
 
+// console.log(filteredStreams);
+
+const filteredStreams = useMemo(() => {
+  return streams.filter((stream) => !!stream.playbackId && stream.creatorId?.value === solanaWalletAddress);
+}, [streams, solanaWalletAddress]); 
+
+console.log(filteredStreams);
   const filteredAssets = useMemo(() => {
     return assets.filter((asset: Asset) => !!asset.playbackId && asset.creatorId?.value === solanaWalletAddress);
   }, [assets, solanaWalletAddress]);
@@ -83,6 +101,10 @@ const Dashboard = () => {
         <Spinner />
       </div>
     );
+  }
+
+  if (!user?.wallet?.address || !streams.length) {
+    // Show loading spinner or nothing
   }
 
   return (
