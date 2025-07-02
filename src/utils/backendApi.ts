@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const backendApi = axios.create({
-  baseURL: 'http://localhost:5300/api',
+  baseURL: 'https://chaintv.onrender.com/api',
   headers: {
     'Content-Type': 'application/json',
   },
