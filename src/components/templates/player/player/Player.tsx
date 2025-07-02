@@ -23,6 +23,7 @@ import image1 from '@/assets/image1.png';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import { getAssets } from '@/features/assetsAPI';
+import { sendChatMessage, fetchChatMessages, fetchRecentMessages } from '@/features/chatAPI';
 import { useViewMetrics } from '@/app/hook/useViewerMetrics';
 import { useStreamGate } from '@/app/hook/useStreamGate';
 // Types
@@ -32,7 +33,21 @@ import Image from 'next/image';
 import { Gift, Smile } from 'lucide-react';
 import { StreamGateModal } from './StreamGateModal';
 import { StreamPayment } from './StreamPayment';
+import { useSearchParams } from 'next/navigation';
+import dynamic from 'next/dynamic';
+
 import { useRouter } from 'next/navigation';
+import { useWallet, useConnection } from '@solana/wallet-adapter-react';
+// import { useConnection } from '@solana/wallet-adapter-react';
+import {   PublicKey, Transaction, SystemProgram} from '@solana/web3.js';
+// import { PublicKey } from '@solana/web3.js';
+
+const WalletMultiButtonDynamic = dynamic(
+  async () =>
+    (await import('@solana/wallet-adapter-react-ui')).WalletMultiButton,
+  { ssr: false }
+);
+
 interface Product {
   id: string;
   name: string;
@@ -54,7 +69,12 @@ export function PlayerWithControls({
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const { viewerMetrics: totalViewers } = useViewMetrics({ playbackId });
+  const { publicKey, sendTransaction, connected } = useWallet();
+  const { connection } = useConnection();
+  // const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
   const { assets, error: assetsError } = useSelector((s: RootState) => s.assets);
+  const { messages: chatMessages, loading: chatLoading, sending: isSendingChat, error: chatError } = useSelector((s: RootState) => s.chat);
   const [products, setProducts] = useState<Product[]>([]);
   const [productsLoading, setProductsLoading] = useState(false);
   const [productsError, setProductsError] = useState<string | null>(null);
@@ -67,6 +87,9 @@ export function PlayerWithControls({
           title,
         )}`
       : null;
+
+  // Chat state management
+  const [chatInput, setChatInput] = useState('');
 
   const handleCopyLink = useCallback(async () => {
     if (!playbackUrl) return toast.error('No playback URL available');
@@ -82,30 +105,100 @@ export function PlayerWithControls({
     dispatch(getAssets());
   }, [dispatch]);
 
+  // Fetch chat messages when component mounts
+  useEffect(() => {
+    if (playbackId) {
+      dispatch(fetchChatMessages(playbackId));
+    }
+  }, [playbackId, dispatch]);
+
   useEffect(() => {
     if (assetsError) {
       toast.error('Failed to fetch assets: ' + assetsError);
     }
   }, [assetsError]);
 
-  const fetchProducts = useCallback(async () => {
-    if (!id) return;
-    setProductsLoading(true);
-    setProductsError(null);
-    try {
-      const { data } = await axios.get(`https://chaintv.onrender.com/api/${id}/products`);
-      setProducts(data.product || []);
-    } catch (e) {
-      setProductsError('Failed to load products.');
-      toast.error('Failed to load products.');
-    } finally {
-      setProductsLoading(false);
+  const handleSend = async (amount: number) => {
+    setMessage(null);
+    if (!publicKey) {
+      setMessage('Error: Wallet not connected');
+      return;
     }
-  }, [id]);
+  
+    try {
+      console.log("Trying to send transaction");
+      const transaction = new Transaction().add(
+        SystemProgram.transfer({
+          fromPubkey: publicKey,
+          toPubkey: new PublicKey(id),
+          lamports: amount * 1e9, // Convert SOL to lamports
+        })
+      );
+      const signature = await sendTransaction(transaction, connection);
+      console.log("Transaction sent successfully, signature:", signature);
+      setMessage(`https://solscan.io/tx/${signature}`);
+    } catch (error: any) {
+      setMessage(`Error: ${error?.message || error}`);
+    } finally {
+      // setLoading(false);
+    }
+  };
 
-  useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+  // Chat functionality
+  const handleSendChat = useCallback(async () => {
+    if (!chatInput.trim() || !connected || !publicKey) {
+      toast.error('Please connect your wallet to send messages');
+      return;
+    }
+
+    const sender = publicKey.toString().slice(0, 5) + '...';
+    const messageData = {
+      message: chatInput.trim(),
+      streamId: playbackId,
+      walletAddress: publicKey.toString(),
+      sender,
+    };
+
+    try {
+      await dispatch(sendChatMessage(messageData)).unwrap();
+      setChatInput('');
+      // toast.success('Message sent successfully!');
+    } catch (error) {
+      toast.error('Failed to send message');
+      console.error('Chat error:', error);
+    }
+  }, [chatInput, connected, publicKey, playbackId, dispatch]);
+
+  const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendChat();
+    }
+  }, [handleSendChat]);
+
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  // const fetchProducts = useCallback(async () => {
+  //   if (!id) return;
+  //   setProductsLoading(true);
+  //   setProductsError(null);
+  //   try {
+  //     const { data } = await axios.get(`https://chaintv.onrender.com/api/${id}/products`);
+  //     setProducts(data.product || []);
+  //   } catch (e) {
+  //     setProductsError('Failed to load products.');
+  //     toast.error('Failed to load products.');
+  //     console.log(e);
+  //   } finally {
+  //     setProductsLoading(false);
+  //   }
+  // }, [id]);
+
+  // useEffect(() => {
+  //   fetchProducts();
+  // }, [fetchProducts]);
 
   // 1. Loading state
   if (loading) {
@@ -326,12 +419,13 @@ export function PlayerWithControls({
                         key={i}
                         className={`${colors[i] || 'bg-main-blue'} text-white px-4 py-2 rounded-md hover:opacity-90 transition-transform transform hover:scale-110 animate-bounce`}
                         style={{ animationDelay: `${i * 0.2}s` }}
-                        onClick={() => alert(`You donated $${amt}!`)}
+                        onClick={() => handleSend(amt)}
                       >
                         ${amt}
                       </button>
                     );
                   })}
+                 
                 </div>
               </div>
               <div>
@@ -353,7 +447,7 @@ export function PlayerWithControls({
             </div>
 
             {/* New: Product Grid Section */}
-            <div className="mt-6">
+            {/* <div className="mt-6">
               <h3 className="text-lg font-semibold mb-4">Products</h3>
               {productsLoading ? (
                 <div className="text-center">
@@ -395,49 +489,103 @@ export function PlayerWithControls({
                   ))}
                 </div>
               )}
+            </div> */}
+             { message && (
+                <div className="mt-3">
+                  {message.startsWith('Error:') ? (
+                    <p className="text-red-500 block">{message}</p>
+                  ) : message.startsWith('https://') ? (
+                    <p className="text-green-600 block">
+                      ✅ Transaction successful!{' '}
+                      <a href={message} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 underline">
+                        View Transaction
+                      </a>
+                    </p>
+                  ) : (
+                    <p className="text-gray-600 block">{message}</p>
+                  )}
+                </div>
+              )}
+            <div className="mt-6">
+              <WalletMultiButtonDynamic />
             </div>
           </div>
 
           {/* Chat Section */}
           <div className="col-span-12 lg:col-span-3">
-            <div className="border rounded-lg h-ull flex flex-col">
+            <div className="border rounded-lg h-full flex flex-col">
               <div className="p-4 border-b">
                 <h3 className="font-semibold text-lg">Chat</h3>
+                {!connected && (
+                  <p className="text-sm text-gray-500 mt-1">Connect wallet to chat</p>
+                )}
               </div>
+              
               {/* Chat messages area */}
-              <div className="flex-1 p-4 overflow-y-auto min-h-[300px] max-h-[500px] flex items-center justify-center text-gray-500">
-                <p>Welcome to the chat!</p>
+              <div className="flex-1 p-4 overflow-y-auto min-h-[300px] max-h-[500px]">
+                {chatLoading ? (
+                  <div className="flex items-center justify-center h-full">
+                    <Bars width={20} height={20} color="#3351FF" />
+                    <span className="ml-2 text-gray-500">Loading messages...</span>
+                  </div>
+                ) : chatMessages.length === 0 ? (
+                  <div className="flex items-center justify-center h-full text-gray-500">
+                    <p>No messages yet. Be the first to chat!</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {chatMessages.map((msg) => (
+                      <div key={msg.id} className="bg-gray-50 rounded-lg p-3">
+                        <div className="flex items-center mb-1">
+                          <span className="font-semibold text-sm text-blue-600">{msg.sender}</span>
+                        </div>
+                        <p className="text-sm text-gray-700">{msg.message}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
+              
               {/* Message input */}
               <div className="border-t p-3">
-                <form className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-2">
                     <input
                       type="text"
-                      placeholder="Send message..."
-                      className="flex-1 border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={chatInput}
+                      onChange={(e) => setChatInput(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      placeholder={connected ? "Send message..." : "Connect wallet to chat"}
+                      disabled={!connected || isSendingChat}
+                      className="flex-1 border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                     />
-                    <button type="button" className="text-gray-500 hover:text-gray-700">
+                    <button 
+                      type="button" 
+                      className="text-gray-500 hover:text-gray-700 disabled:opacity-50"
+                      disabled={!connected}
+                    >
                       <Smile size={18} />
                     </button>
                   </div>
                   <div className="flex items-center justify-between">
                     <button
-                      onClick={() => {}}
                       type="button"
-                      className="flex items-center gap-1 text-gray-500 hover:text-gray-700"
+                      disabled={!connected}
+                      className="flex items-center gap-1 text-gray-500 hover:text-gray-700 disabled:opacity-50"
                     >
                       <Gift size={18} />
                       <span>Gift</span>
                     </button>
                     <button
-                      type="submit"
-                      className="bg-blue-600 text-white px-4 py-1 rounded-md hover:bg-blue-700 transition-colors"
+                      type="button"
+                      onClick={handleSendChat}
+                      disabled={!connected || isSendingChat || !chatInput.trim()}
+                      className="bg-blue-600 text-white px-4 py-1 rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                     >
-                      Chat
+                      {isSendingChat ? 'Sending...' : 'Chat'}
                     </button>
                   </div>
-                </form>
+                </div>
               </div>
             </div>
           </div>

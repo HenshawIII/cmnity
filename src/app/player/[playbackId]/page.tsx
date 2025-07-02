@@ -79,23 +79,26 @@ const PlayerPage = () => {
   };
 
   // Fetch products based on the creator's ID (from the main asset)
-  useEffect(() => {
-    if (mainAsset && mainAsset.creatorId?.value) {
-      setProductsLoading(true);
-      fetch(`https://chaintv.onrender.com/api/${mainAsset.creatorId.value}/products`)
-        .then((res) => res.json())
-        .then((data) => {
-          setProducts(data.product || []);
-        })
-        .catch((err) => {
-          setProductsError('Failed to load products. Please try again.');
-          toast.error('Failed to load products. Please try again.');
-        })
-        .finally(() => {
-          setProductsLoading(false);
-        });
-    }
-  }, [mainAsset]);
+  // useEffect(() => {
+  //   if (mainAsset && mainAsset.creatorId?.value) {
+  //     setProductsLoading(true);
+  //     fetch(`https://chaintv.onrender.com/api/${mainAsset.creatorId.value}/products`)
+  //       .then((res) => {
+  //         console.log(res);
+  //         return res.json();
+  //       })
+  //       .then((data) => {
+  //         setProducts(data.product || []);
+  //       })
+  //       .catch((err) => {
+  //         setProductsError('Failed to load products. Please try again.');
+  //         toast.error('Failed to load products. Please try again.');
+  //       })
+  //       .finally(() => {
+  //         setProductsLoading(false);
+  //       });
+  //   }
+  // }, [mainAsset]);
 
   // 1. While fetching video details, show loader
   if (detailsLoading) {
@@ -199,7 +202,7 @@ const PlayerPage = () => {
               </div>
             </div>
             {/* Product Section */}
-            <div className="p-4 border rounded-md">
+            {/* <div className="p-4 border rounded-md">
               <h3 className="text-lg font-semibold mb-2">Products</h3>
               {productsLoading ? (
                 <p>Loading products...</p>
@@ -224,11 +227,11 @@ const PlayerPage = () => {
                       >
                         Buy Now
                       </button>
-                    </div>
+                    </div>  
                   ))}
                 </div>
               )}
-            </div>
+            </div> */}
           </main>
 
           {/* Right Pane: Comments Section */}

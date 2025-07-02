@@ -9,6 +9,7 @@ import { headers } from 'next/headers';
 import '@coinbase/onchainkit/styles.css';
 import { cookieToInitialState } from 'wagmi';
 import getConfig from 'next/config';
+import { SolanaProvider } from '@/context/solProv';
 
 export const metadata: Metadata = {
   title: 'Chainfren TV',
@@ -25,12 +26,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} antialiased`}>
+        <SolanaProvider customRpcUrl="https://solana-mainnet.g.alchemy.com/v2/8rgdAH9Vy_zuXQFA2hedqK_a_3GAxvuZ">
         <Providers>
           <main>
             <Toaster position="top-center" richColors />
             {children}
           </main>
         </Providers>
+        </SolanaProvider>
       </body>
     </html>
   );

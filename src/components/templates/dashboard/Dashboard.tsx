@@ -26,6 +26,7 @@ const Dashboard = () => {
   const { user, ready, authenticated } = usePrivy();
   const navigate = useRouter();
   const dispatch = useDispatch<AppDispatch>();
+  const solanaWalletAddress = useSelector((state: RootState) => state.user.solanaWalletAddress);
   const { streams, loading: streamsLoading, error: streamsError } = useSelector((state: RootState) => state.streams);
   const { assets, loading: assetsLoading, error: assetsError } = useSelector((state: RootState) => state.assets);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -34,12 +35,16 @@ const Dashboard = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
-    if (ready && authenticated) {
+    
       dispatch(getAllStreams());
       dispatch(getAssets());
-    }
+    
   }, [dispatch, ready, authenticated]);
 
+  // console.log(streams);
+  useEffect(() => {
+    console.log(streams,solanaWalletAddress);
+  }, [streams]);
   useEffect(() => {
     if (streamsError) {
       toast.error('Failed to fetch streams: ' + streamsError);
@@ -57,12 +62,12 @@ const Dashboard = () => {
   }, [ready, authenticated, navigate]);
 
   const filteredStreams = useMemo(() => {
-    return streams.filter((stream) => !!stream.playbackId && stream.creatorId?.value === user?.wallet?.address);
-  }, [streams, user?.wallet?.address]);
+    return streams.filter((stream) => !!stream.playbackId && stream.creatorId?.value === solanaWalletAddress);
+  }, [streams, solanaWalletAddress]);
 
   const filteredAssets = useMemo(() => {
-    return assets.filter((asset: Asset) => !!asset.playbackId && asset.creatorId?.value === user?.wallet?.address);
-  }, [assets, user?.wallet?.address]);
+    return assets.filter((asset: Asset) => !!asset.playbackId && asset.creatorId?.value === solanaWalletAddress);
+  }, [assets, solanaWalletAddress]);
 
   // NEW: only when not loading, no error, and zero existing streams
   const canCreateStream = !streamsLoading && !streamsError && filteredStreams.length === 0;
@@ -149,7 +154,7 @@ const Dashboard = () => {
                     image={image1}
                     goLive={() => initiateLiveVideo(stream.id)}
                     streamId={stream.id}
-                    playbackId={stream.id}
+                    playbackId={stream.id}  
                     playb={stream.playbackId}
                     lastSeen={new Date(stream.lastSeen || 0)}
                     status={stream.isActive}

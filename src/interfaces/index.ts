@@ -47,6 +47,7 @@ export interface Stream {
   isActive: boolean;
   thumbnailUrl?: string;
   viewerCount?: number;
+  logo: string;
 }
 
 export interface PopupProps {

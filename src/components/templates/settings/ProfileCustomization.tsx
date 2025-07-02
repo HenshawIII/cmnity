@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect ,useMemo} from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import { toast } from 'sonner';
 import { Bars } from 'react-loader-spinner';
@@ -52,13 +52,15 @@ export function ProfileCustomization() {
   const [isExistingProfile, setIsExistingProfile] = useState(false);
 
   // Fetch existing profile data
+
+  const creatorAddress = useMemo(() => user?.wallet?.chainType === 'solana' ? user.wallet.address : solanaWalletAddress, [user?.wallet?.address, solanaWalletAddress]);
   useEffect(() => {
     const fetchProfile = async () => {
-      if (!user?.wallet?.address) return;
+      if (!creatorAddress) return;
       
       try {
         setLoading(true);
-        const response = await axios.get(`https://chaintv.onrender.com/api/creators/${user.wallet.address}/profile`);
+        const response = await axios.get(`https://chaintv.onrender.com/api/creators/${creatorAddress}/profile`);
         console.log('response', response);
         if (response.data) {
           setProfileData(response.data.profile);
@@ -73,16 +75,16 @@ export function ProfileCustomization() {
     };
 
     fetchProfile();
-  }, [user?.wallet?.address]);
+  }, [creatorAddress]);
 
   // Generate profile URL
   useEffect(() => {
-    const creatorAddress = user?.wallet?.chainType === 'solana' ? user.wallet.address : solanaWalletAddress;
+   
     if (creatorAddress) {
       const host = process.env.NEXT_PUBLIC_BASE_URL || window.location.origin;
       setProfileUrl(`${host}/creator/${creatorAddress}`);
     }
-  }, [user?.wallet, solanaWalletAddress]);
+  }, [creatorAddress]);
 
   const handleInputChange = (field: string, value: string) => {
     setProfileData(prev => ({
@@ -148,7 +150,7 @@ export function ProfileCustomization() {
   };
 
   const handleSave = async () => {
-    if (!user?.wallet?.address) {
+    if (!creatorAddress) {
       toast.error('Wallet not connected');
       return;
     }
@@ -160,7 +162,7 @@ export function ProfileCustomization() {
 
     try {
       setSaving(true);
-      const endpoint = `https://chaintv.onrender.com/api/creators/${user.wallet.address}/profile`;
+      const endpoint = `https://chaintv.onrender.com/api/creators/${creatorAddress}/profile`;
       const method = isExistingProfile ? 'put' : 'post';
       
       await axios({
@@ -168,7 +170,7 @@ export function ProfileCustomization() {
         url: endpoint,
         data: {
           ...profileData,
-          creatorId: user.wallet.address
+          creatorId: creatorAddress
         }
       });
 
