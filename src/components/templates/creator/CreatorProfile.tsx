@@ -53,7 +53,7 @@ export function CreatorProfile({ creatorId }: CreatorProfileProps) {
     const fetchCreatorProfile = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`http://localhost:5300/api/creators/${creatorId}/profile`);
+        const response = await axios.get(`https://chaintv.onrender.com/api/creators/${creatorId}/profile`);
         console.log('response', response);
         setCreatorProfile(response.data.profile);
       } catch (err: any) {
@@ -107,9 +107,9 @@ export function CreatorProfile({ creatorId }: CreatorProfileProps) {
     }
   }, [streamsError, assetsError]);
 
-  useEffect(() => {
-    console.log('creatorProfile', creatorProfile);
-  }, [creatorProfile]);
+  // useEffect(() => {
+  //   console.log('creatorProfile', creatorProfile);
+  // }, [creatorProfile]);
 
   if (loading) {
     return <CreatorProfileLoading />;
