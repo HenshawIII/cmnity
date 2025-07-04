@@ -6,8 +6,8 @@ const inter = Inter({ subsets: ['latin'] });
 import './globals.css';
 import Providers from './providers';
 import { headers } from 'next/headers';
-import '@coinbase/onchainkit/styles.css';
-import { cookieToInitialState } from 'wagmi';
+// import '@coinbase/onchainkit/styles.css';
+// import { cookieToInitialState } from 'wagmi';
 import getConfig from 'next/config';
 import { SolanaProvider } from '@/context/solProv';
 

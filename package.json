@@ -10,7 +10,7 @@
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,scss,md}\""
   },
   "dependencies": {
-    "@coinbase/onchainkit": "^0.37.8",
+    
     "@heroicons/react": "^2.1.5",
     "@livepeer/react": "^4.2.7",
     "@privy-io/react-auth": "^2.0.4",
