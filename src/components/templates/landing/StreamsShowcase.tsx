@@ -36,20 +36,20 @@ export default function StreamsShowcase({ streams, loading }: StreamsShowcasePro
       
       {/* Tabs */}
       <div className="flex justify-center mb-8">
-        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-1 border border-white/20">
+        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-1 border border-white/20 flex">
           <button
             onClick={() => setActiveTab('streams')}
-            className={`px-6 py-2 rounded-md transition-all duration-200 ${
+            className={`flex-1 px-6 py-2 rounded-md transition-all duration-200 ${
               activeTab === 'streams'
                 ? 'bg-white text-gray-900 font-semibold'
                 : 'text-white hover:bg-white/10'
             }`}
           >
-            Live Streams
+            Livestreams
           </button>
           <button
             onClick={() => setActiveTab('videos')}
-            className={`px-6 py-2 rounded-md transition-all duration-200 ${
+            className={`flex-1 px-6 py-2 rounded-md transition-all duration-200 ${
               activeTab === 'videos'
                 ? 'bg-white text-gray-900 font-semibold'
                 : 'text-white hover:bg-white/10'
@@ -91,8 +91,9 @@ export default function StreamsShowcase({ streams, loading }: StreamsShowcasePro
                 <div className="p-4">
                   <h3 className="text-lg font-semibold text-white mb-1 truncate">{stream.name}</h3>
                   {stream.creatorId?.value && (
-                    <div className="text-xs text-purple-300">by {stream.creatorId.value}</div>
+                    <div className="text-xs text-purple-300">by {stream.creatorId.value.slice(0, 5) + '...' + stream.creatorId.value.slice(-5)}</div>
                   )}
+                  {/* <div className="text-xs text-purple-300">{stream.description}</div> */}
                 </div>
               </Link>
             ))}
@@ -112,13 +113,15 @@ export default function StreamsShowcase({ streams, loading }: StreamsShowcasePro
               <Link 
                 key={asset.id} 
                 href={`/player/${asset.playbackId}?id=${encodeURIComponent(asset.id)}`} 
-                className="block bg-white/10 rounded-lg overflow-hidden shadow-lg hover:scale-105 transition-transform"
+                className="block bg-white/10 rounded-lg overflow-hidden shadow-lg md:w-[20vw]  m-5 hover:scale-105 transition-transform"
               >
-                <div className="h-40 bg-gray-800 flex items-center justify-center relative">
+                <div className="h-40 bg-gray-200 flex items-center justify-center relative">
                   {asset.downloadUrl ? (
-                    <img src={asset.downloadUrl} alt={asset.name} className="object-cover w-full h-full" />
+                    // <img src={asset.downloadUrl} alt={asset.name} className="object-cover w-full h-full" />
+                    <span className="text-gray-800 text-center text-2xl font-bold">Video</span>
                   ) : (
-                    <span className="text-gray-400">No Thumbnail</span>
+                    <span className="text-gray-800 text-center text-2xl font-bold">Video</span>
+                    // <img src={image1.src} alt={asset.name} className="object-cover w-full h-full" />
                   )}
                   <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
                     {asset.videoSpec?.duration ? 
@@ -130,7 +133,7 @@ export default function StreamsShowcase({ streams, loading }: StreamsShowcasePro
                 <div className="p-4">
                   <h3 className="text-lg font-semibold text-white mb-1 truncate">{asset.name}</h3>
                   {asset.creatorId?.value && (
-                    <div className="text-xs text-purple-300">by {asset.creatorId.value}</div>
+                    <div className="text-xs text-purple-300">by {asset.creatorId.value.slice(0, 5) + '...' + asset.creatorId.value.slice(-5)}</div>
                   )}
                 </div>
               </Link>

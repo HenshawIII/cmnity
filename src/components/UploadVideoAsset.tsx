@@ -6,9 +6,9 @@ import * as tus from 'tus-js-client';
 import api from '@/utils/api';
 import { usePrivy } from '@privy-io/react-auth';
 import { toast } from 'sonner';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { getAssets } from '@/features/assetsAPI';
-import { AppDispatch } from '@/store/store';
+import { AppDispatch, RootState } from '@/store/store';
 import axios from 'axios';
 import InputField from './ui/InputField';
 
@@ -26,6 +26,8 @@ export default function UploadVideoAsset({ onClose }: { onClose: () => void }) {
   const [presetValues, setPresetValues] = useState<number[]>([0, 0, 0, 0]);
 
   const dispatch = useDispatch<AppDispatch>();
+  const solanaWalletAddress = useSelector((state: RootState) => state.user.solanaWalletAddress);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) setFile(e.target.files[0]);
   };
@@ -85,7 +87,9 @@ export default function UploadVideoAsset({ onClose }: { onClose: () => void }) {
         name: title,
         creatorId: {
           type: 'unverified',
-          value: user?.wallet?.address || '',
+          value: user?.wallet?.chainType === 'solana' && user?.wallet?.address
+            ? user.wallet.address
+            : solanaWalletAddress,
         },
       });
 
@@ -97,7 +101,9 @@ export default function UploadVideoAsset({ onClose }: { onClose: () => void }) {
         viewMode,
         amount,
         assetName: name || title,
-        creatorId: user?.wallet?.address,
+        creatorId: user?.wallet?.chainType === 'solana' && user?.wallet?.address
+          ? user.wallet.address
+          : solanaWalletAddress,
         donation: presetValues,
       });
       if (secondResponse.status === 200) {

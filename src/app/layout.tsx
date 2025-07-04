@@ -12,8 +12,8 @@ import getConfig from 'next/config';
 import { SolanaProvider } from '@/context/solProv';
 
 export const metadata: Metadata = {
-  title: 'Chainfren TV',
-  description: 'Chainfren TV',
+  title: 'Switch TV',
+  description: 'Switch TV',
   icons: {
     icon: './assets/images/favicon.ico',
   },

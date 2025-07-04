@@ -19,7 +19,7 @@ import { getIngest } from '@livepeer/react/external';
 import { toast } from 'sonner';
 import { Settings } from './Settings';
 import styles from './BroadcastScroll.module.css';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { RiVideoAddLine } from 'react-icons/ri';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -33,6 +33,11 @@ import { IoMdClose } from 'react-icons/io';
 import { usePrivy } from '@privy-io/react-auth';
 import { useGetStreamDetails } from '@/app/hook/useStreamGate';
 import { Bars } from 'react-loader-spinner';
+import { RootState } from '@/store/store';
+import { useSelector } from 'react-redux';
+import { sendChatMessage, fetchChatMessages } from '@/features/chatAPI';
+import { useDispatch } from 'react-redux';
+import type { AppDispatch } from '@/store/store';
 
 interface Streams {
   streamKey: string;
@@ -44,13 +49,19 @@ interface Streams {
 
 export function BroadcastWithControls({ streamName, streamKey, playbackId }: Streams) {
   const { user } = usePrivy();
-  const creatorId = user?.wallet?.address || '';
+  const solanaWalletAddress = useSelector((state: RootState) => state.user.solanaWalletAddress);
+  const creatorId = user?.wallet?.chainType === 'solana' && user?.wallet?.address
+    ? user.wallet.address
+    : solanaWalletAddress;
+  const dispatch = useDispatch<AppDispatch>();
+
+  // console.log('creatorId', creatorId);
   const host = process.env.NEXT_PUBLIC_BASE_URL;
   const playbackUrl =
     host && playbackId
       ? `${host.includes('localhost') ? 'http' : 'https'}://${host}/view/${playbackId}` +
         `?streamName=${encodeURIComponent(streamName)}` +
-        `&id=${encodeURIComponent(creatorId)}`
+        `&id=${encodeURIComponent(creatorId || '')}`
       : null;
   const router = useRouter();
 
@@ -88,10 +99,11 @@ export function BroadcastWithControls({ streamName, streamKey, playbackId }: Str
   const [showAds, setShowAds] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [chatMessages, setChatMessages] = useState([
-    { user: 'Creator', message: 'Gm guys, where are you streaming from? WAGMI!', highlight: true },
-  ]);
-  const [newMessage, setNewMessage] = useState('');
+    // const [chatMessages, setChatMessages] = useState([
+    //   { user: 'Creator', message: 'Gm guys, where are you streaming from? WAGMI!', highlight: true },
+    // ]);
+  const { messages: chatMessages, loading: chatLoading, sending: isSendingChat, error: chatError } = useSelector((s: RootState) => s.chat);
+  const [chatInput, setChatInput] = useState('');
   const { viewerMetrics } = useViewMetrics({ playbackId, refreshInterval: 10000 });
   const viewerCount = viewerMetrics?.viewCount || 0;
 
@@ -157,12 +169,44 @@ export function BroadcastWithControls({ streamName, streamKey, playbackId }: Str
     setShowInfo(false);
   };
 
-  const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newMessage.trim()) return;
-    setChatMessages((msgs) => [...msgs, { user: 'You', message: newMessage, highlight: false }]);
-    setNewMessage('');
-  };
+  const handleSendMessage = useCallback(async () => {
+    // if (!chatInput.trim() || !connected || !publicKey) {
+    //   toast.error('Please connect your wallet to send messages');
+    //   return;
+    // }
+
+    // const sender = publicKey.toString().slice(0, 5) + '...';
+    const messageData = {
+      message: chatInput.trim(),
+      streamId: playbackId,
+      walletAddress: creatorId || '',
+      sender: creatorId || '',
+    };
+
+    try {
+      await dispatch(sendChatMessage(messageData)).unwrap();
+      setChatInput('');
+      // toast.success('Message sent successfully!');
+    } catch (error) {
+      toast.error('Failed to send message');
+      console.error('Chat error:', error);
+    }
+  }, [chatInput, creatorId, playbackId, dispatch]);
+
+  useEffect(() => {
+    if (playbackId) {
+      dispatch(fetchChatMessages(playbackId));
+    }
+  }, [dispatch, playbackId]);
+
+  useEffect(() => {
+    if (!playbackId) return;
+    const interval = setInterval(() => {
+      dispatch(fetchChatMessages(playbackId));
+    }, 5000); // fetch every 3 seconds
+
+    return () => clearInterval(interval);
+  }, [dispatch, playbackId]);
 
   if (detailsLoading) {
     return (
@@ -382,19 +426,25 @@ export function BroadcastWithControls({ streamName, streamKey, playbackId }: Str
                           <p className="text-center text-gray-500 mb-4">Welcome to {streamName} chat!</p>
                           <div className="space-y-3">
                             {chatMessages.map((msg, index) => (
-                              <div key={index}>
-                                <span className={`font-bold ${msg.highlight ? 'text-blue-600' : ''}`}>{msg.user}:</span>{' '}
-                                {msg.message}
+                              <div key={index} className="bg-gray-50 rounded-lg p-3">
+                                <span className={`font-bold ${msg?.sender === creatorId ? 'text-red-600' : ''}`}>{msg?.sender === creatorId ? 'Streamer' : msg?.sender}:</span>{' '}
+                                {msg?.message}
                               </div>
                             ))}
                           </div>
                         </div>
                         <div className="p-3 border-t">
-                          <form onSubmit={handleSendMessage} className="flex flex-col space-y-2">
+                          <form
+                            onSubmit={(e) => {
+                              e.preventDefault();
+                              handleSendMessage();
+                            }}
+                            className="flex flex-col space-y-2"
+                          >
                             <input
                               type="text"
-                              value={newMessage}
-                              onChange={(e) => setNewMessage(e.target.value)}
+                              value={chatInput}
+                              onChange={(e) => setChatInput(e.target.value)}
                               placeholder="Send message..."
                               className="w-full border rounded-md py-2 px-3"
                             />
@@ -543,19 +593,25 @@ export function BroadcastWithControls({ streamName, streamKey, playbackId }: Str
                   <p className="text-center text-gray-500 mb-4">Welcome to the chat!</p>
                   <div className="space-y-3">
                     {chatMessages.map((msg, index) => (
-                      <div key={index}>
-                        <span className={`font-bold ${msg.highlight ? 'text-blue-600' : ''}`}>{msg.user}:</span>{' '}
-                        {msg.message}
+                      <div key={index} className="bg-gray-50 rounded-lg p-3">
+                        <span className={`font-bold ${msg?.sender === creatorId ? 'text-red-600' : 'text-blue-600'}`}>{msg?.sender === creatorId ? 'You' : msg?.sender}:</span>{' '}
+                        {msg?.message}
                       </div>
                     ))}
                   </div>
                 </div>
                 <div className="p-3 border-t bg-white">
-                  <form onSubmit={handleSendMessage} className="flex flex-col space-y-2">
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      handleSendMessage();
+                    }}
+                    className="flex flex-col space-y-2"
+                  >
                     <input
                       type="text"
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
+                      value={chatInput}
+                      onChange={(e) => setChatInput(e.target.value)}
                       placeholder="Send message..."
                       className="w-full border rounded-md py-2 px-3"
                     />

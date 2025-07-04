@@ -71,7 +71,9 @@ const Header = ({ toggleMenu, mobileOpen }: { toggleMenu: () => void; mobileOpen
               {mobileOpen ? <X className="h-7 w-7 text-[#000]" /> : <Menu className="h-7 w-7 text-[#000]" />}
             </button>
             <div className="  px-3 py-1.5 rounded-md ">
-              <Image src={Chainfren_Logo} alt={'header_Logo'} />
+              {/* <Image src={Chainfren_Logo} alt={'header_Logo'} />
+               */}
+               <h1 className="text-2xl font-bold">Switch TV</h1>
             </div>
           </div>
           {/* Avatar */}

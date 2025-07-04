@@ -1,5 +1,5 @@
 'use client';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import * as Player from '@livepeer/react/player';
 import axios from 'axios';
 import { Bars, ColorRing } from 'react-loader-spinner';
@@ -71,7 +71,6 @@ export function PlayerWithControls({
   const { viewerMetrics: totalViewers } = useViewMetrics({ playbackId });
   const { publicKey, sendTransaction, connected } = useWallet();
   const { connection } = useConnection();
-  // const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const { assets, error: assetsError } = useSelector((s: RootState) => s.assets);
   const { messages: chatMessages, loading: chatLoading, sending: isSendingChat, error: chatError } = useSelector((s: RootState) => s.chat);
@@ -90,6 +89,7 @@ export function PlayerWithControls({
 
   // Chat state management
   const [chatInput, setChatInput] = useState('');
+  const chatEndRef = useRef<HTMLDivElement | null>(null);
 
   const handleCopyLink = useCallback(async () => {
     if (!playbackUrl) return toast.error('No playback URL available');
@@ -113,11 +113,27 @@ export function PlayerWithControls({
   }, [playbackId, dispatch]);
 
   useEffect(() => {
+    if (!playbackId) return;
+    const interval = setInterval(() => {
+      dispatch(fetchChatMessages(playbackId));
+    }, 5000); // fetch every 3 seconds
+
+    return () => clearInterval(interval);
+  }, [dispatch, playbackId]);
+
+  useEffect(() => {
     if (assetsError) {
       toast.error('Failed to fetch assets: ' + assetsError);
     }
   }, [assetsError]);
 
+
+  // useEffect(() => {
+  //   if (chatEndRef.current) {
+  //     chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+  //   }
+  // }, [chatMessages]);
+  
   const handleSend = async (amount: number) => {
     setMessage(null);
     if (!publicKey) {
@@ -234,6 +250,7 @@ export function PlayerWithControls({
       </StreamGateModal>
     );
   }
+
 
   return (
     <div
@@ -523,12 +540,7 @@ export function PlayerWithControls({
               
               {/* Chat messages area */}
               <div className="flex-1 p-4 overflow-y-auto min-h-[300px] max-h-[500px]">
-                {chatLoading ? (
-                  <div className="flex items-center justify-center h-full">
-                    <Bars width={20} height={20} color="#3351FF" />
-                    <span className="ml-2 text-gray-500">Loading messages...</span>
-                  </div>
-                ) : chatMessages.length === 0 ? (
+                {chatMessages.length === 0 ? (
                   <div className="flex items-center justify-center h-full text-gray-500">
                     <p>No messages yet. Be the first to chat!</p>
                   </div>
@@ -537,11 +549,12 @@ export function PlayerWithControls({
                     {chatMessages.map((msg) => (
                       <div key={msg.id} className="bg-gray-50 rounded-lg p-3">
                         <div className="flex items-center mb-1">
-                          <span className="font-semibold text-sm text-blue-600">{msg.sender}</span>
+                          <span className={`font-semibold text-sm ${msg.sender === id ? 'text-red-600' : 'text-blue-600'}`}>{msg.sender === id ? 'Streamer' : msg.sender}</span>
                         </div>
                         <p className="text-sm text-gray-700">{msg.message}</p>
                       </div>
                     ))}
+                    {/* <div ref={chatEndRef} /> */}
                   </div>
                 )}
               </div>

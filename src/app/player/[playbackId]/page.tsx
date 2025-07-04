@@ -27,6 +27,7 @@ const PlayerPage = () => {
   const playbackId = params?.playbackId as string;
   const { assets, error } = useSelector((state: RootState) => state.assets);
   const { streams } = useSelector((state: RootState) => state.streams);
+  const solanaWalletAddress = useSelector((state: RootState) => state.user.solanaWalletAddress);
   const {
     video: details,
     loading: detailsLoading,
@@ -35,7 +36,7 @@ const PlayerPage = () => {
     setHasAccess,
     markPaid,
   } = useGetAssetGate(playbackId);
-  console.log(details, detailsLoading, detailsError, hasAccess, setHasAccess, markPaid);
+  // console.log(details, detailsLoading, detailsError, hasAccess, setHasAccess, markPaid);
   // State for products
   const [products, setProducts] = useState<any[]>([]);
   const [productsLoading, setProductsLoading] = useState<boolean>(false);
@@ -43,6 +44,7 @@ const PlayerPage = () => {
 
   // Fetch assets for video details
   useEffect(() => {
+    // console.log("user",user)
     dispatch(getAssets());
     dispatch(getAllStreams());
   }, [dispatch]);
@@ -53,14 +55,16 @@ const PlayerPage = () => {
     }
   }, [streamId, dispatch]);
   // console.log('streamj', stream);
-
+  console.log("user",user)
   useEffect(() => {
     if (error) {
       toast.error('Failed to fetch assets: ' + error);
     }
   }, [error]);
 
-  const creatorId = user?.wallet?.address;
+  const creatorId = user?.wallet?.chainType === 'solana' && user?.wallet?.address
+    ? user.wallet.address
+    : solanaWalletAddress;
   // Find the main asset (video) that matches the playbackId from the URL
   const mainAsset = useMemo(() => assets.find((asset) => asset.playbackId === playbackId), [assets, playbackId]);
 
