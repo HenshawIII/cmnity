@@ -32,7 +32,7 @@ import type { StaticImageData } from 'next/image';
 import Image from 'next/image';
 import { Gift, Smile } from 'lucide-react';
 import { StreamGateModal } from './StreamGateModal';
-import { StreamPayment } from './StreamPayment';
+// import { StreamPayment } from './StreamPayment';
 import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 
@@ -231,25 +231,25 @@ export function PlayerWithControls({
     return <div className="text-center text-red-500 mt-10">{error}</div>;
   }
 
-  // 3. If not allowed yet, show gate modal
-  if (!hasAccess && stream?.viewMode !== 'free') {
-    return (
-      <StreamGateModal
-        open={!hasAccess}
-        onClose={() => router.back()}
-        title="Locked Stream"
-        description={`A one-time fee of $${stream?.amount.toFixed(2)} unlocks access.`}
-      >
-        <StreamPayment
-          stream={stream as any}
-          onPaid={(addr) => {
-            setHasAccess(true);
-            markPaid(addr);
-          }}
-        />
-      </StreamGateModal>
-    );
-  }
+  // // 3. If not allowed yet, show gate modal
+  // if (!hasAccess && stream?.viewMode !== 'free') {
+  //   return (
+  //     <StreamGateModal
+  //       open={!hasAccess}
+  //       onClose={() => router.back()}
+  //       title="Locked Stream"
+  //       description={`A one-time fee of $${stream?.amount.toFixed(2)} unlocks access.`}
+  //     >
+  //       <StreamPayment
+  //         stream={stream as any}
+  //         onPaid={(addr) => {
+  //           setHasAccess(true);
+  //           markPaid(addr);
+  //         }}
+  //       />
+  //     </StreamGateModal>
+  //   );
+  // }
 
 
   return (

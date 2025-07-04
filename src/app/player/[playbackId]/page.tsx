@@ -14,7 +14,7 @@ import { Bars, ColorRing } from 'react-loader-spinner';
 import { getAllStreams, getStreamById } from '@/features/streamAPI';
 import { useGetAssetGate } from '@/app/hook/useAssetGate';
 import { StreamGateModal } from '@/components/templates/player/player/StreamGateModal';
-import { StreamPayment } from '@/components/templates/player/player/StreamPayment';
+// import { StreamPayment } from '@/components/templates/player/player/StreamPayment';
 import Image from 'next/image';
 
 const PlayerPage = () => {
@@ -120,24 +120,24 @@ const PlayerPage = () => {
   }
 
   // 3. If stream is gated, show gate modal (only after load complete)
-  if (!hasAccess && details?.viewMode !== 'free') {
-    return (
-      <StreamGateModal
-        open={true}
-        onClose={() => router.back()}
-        title="Locked Video"
-        description={`This video requires payment to view.`}
-      >
-        <StreamPayment
-          stream={details as any}
-          onPaid={(addr) => {
-            setHasAccess(true);
-            markPaid(addr);
-          }}
-        />
-      </StreamGateModal>
-    );
-  }
+  // if (!hasAccess && details?.viewMode !== 'free') {
+  //   return (
+  //     <StreamGateModal
+  //       open={true}
+  //       onClose={() => router.back()}
+  //       title="Locked Video"
+  //       description={`This video requires payment to view.`}
+  //     >
+  //       <StreamPayment
+  //         stream={details as any}
+  //         onPaid={(addr) => {
+  //           setHasAccess(true);
+  //           markPaid(addr);
+  //         }}
+  //       />
+  //     </StreamGateModal>
+  //   );
+  // }
 
   // 4. Otherwise render the full player page
   return (
