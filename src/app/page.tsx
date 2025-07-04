@@ -36,22 +36,20 @@ export default function LandingPage() {
       <Hero />
       <StreamsShowcase streams={streams} loading={loading} />
       {/* Footer */}
-      <footer className="border-t border-white/20 mt-12 pt-6 pb-2 px-4 w-full">
-        <div className="flex flex-col sm:flex-row items-center justify-between max-w-5xl mx-auto gap-4">
-          {/* Left: Twitter */}
-          <Link href="https://twitter.com/yourtwitter" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
-            {/* Replace '/assets/twitter.png' with your provided image path */}
-            <Image src="/assets/xpn.svg" alt="Twitter" width={28} height={28} />
-            {/* <span className="text-white text-sm">Twitter</span> */}
-          </Link>
-          {/* Right: Reach Out button */}
-          <button className=" hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-md transition-colors">
-            Reach Out ?
-          </button>
-        </div>
-        {/* Centered Switchtv text */}
-        <div className="text-center text-white text-sm mt-4">Switchtv</div>
-      </footer>
+     <footer className="border-t border-white/20 mt-12 pt-6 pb-2 px-4 w-full">
+  <div className="flex flex-col items-center justify-center max-w-5xl mx-auto gap-4">
+    {/* Twitter Link */}
+    <Link href="https://twitter.com/yourtwitter" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+      <Image src="/assets/xpn.svg" alt="Twitter" width={28} height={28} />
+    </Link>
+    {/* Reach Out Button */}
+    <button className="hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-md transition-colors">
+      Reach Out ?
+    </button>
+    {/* Switchtv Text */}
+    <div className="text-center text-white text-sm mt-1">Switchtv</div>
+  </div>
+</footer>
     </div>
   );
 }
