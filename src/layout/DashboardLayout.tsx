@@ -10,14 +10,14 @@ import { useRouter } from 'next/navigation';
 
 const inter = Inter({ subsets: ['latin'] });
 // Rename the component to follow React naming conventions
-const DashboardLayout = ({ children, name = 'Moshood' }: { children: React.ReactNode; name: string }) => {
+const DashboardLayout = ({ children, name = 'Muritala' }: { children: React.ReactNode; name: string }) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const toggleDrawer = () => setIsDrawerOpen(!isDrawerOpen);
   const navigate = useRouter();
   return (
     <div className={`${inter.className} text-black-primary-text flex h-screen `}>
       {/* Sidebar for desktop */}
-      <aside className="hidden md:block w-72 px-4 bg-white shadow-md">
+      <aside className="hidden md:block w-72 px-4 shadow-md">
         <div className="pl-4 flex justify-between items-center">
           <div className=" py-6 font-bold uppercase text-black-primary-text">
             <h1> Creator Dashboard</h1>

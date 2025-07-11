@@ -51,7 +51,7 @@ export default function MobileSidebar({
       <aside
         data-sidebar="true"
         className={clsx(
-          'fixed md:relative z-40 left-0 h-full transition-all duration-300 ease-in-out bg-white border-r border-[#dfe0e1] flex flex-col',
+          'fixed md:relative z-40 left-0 h-full transition-all duration-300 ease-in-out bg-red-500 border-r border-[#dfe0e1] flex flex-col',
           {
             // Mobile states
             'w-[60%] left-0': mobileMenuOpen && !sidebarCollapsed, // Expanded sidebar for mobile

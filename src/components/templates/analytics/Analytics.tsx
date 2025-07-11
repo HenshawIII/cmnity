@@ -22,9 +22,15 @@ const Analytics = () => {
   const dispatch = useDispatch<AppDispatch>()
   const { streams, loading: streamsLoading } = useSelector((state: RootState) => state.streams)
   const { assets, loading: assetsLoading, error: assetsError } = useSelector((state: RootState) => state.assets)
+  const solanaWalletAddress = useSelector((state: RootState) => state.user.solanaWalletAddress)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const { viewMetrics, loading } = useViewerMetrics({ filter: "all" }) // Fetch view metrics
+
+  // Get the correct wallet address using the same logic as CreateLivestream
+  const creatorAddress = useMemo(() => {
+    return user?.wallet?.chainType === 'solana' ? user.wallet.address : solanaWalletAddress
+  }, [user?.wallet?.address, solanaWalletAddress])
 
   const insightsData = [
     {
@@ -53,12 +59,12 @@ const Analytics = () => {
   }
 
   const filteredStreams = useMemo(() => {
-    return streams.filter((stream: Stream) => !!stream.playbackId && stream.creatorId?.value === user?.wallet?.address)
-  }, [streams, user?.wallet?.address])
+    return streams.filter((stream: Stream) => !!stream.playbackId && stream.creatorId?.value === creatorAddress)
+  }, [streams, creatorAddress])
 
   const filteredAssets = useMemo(() => {
-    return assets.filter((asset: Asset) => !!asset.playbackId && asset.creatorId?.value === user?.wallet?.address)
-  }, [assets, user?.wallet?.address])
+    return assets.filter((asset: Asset) => !!asset.playbackId && asset.creatorId?.value === creatorAddress)
+  }, [assets, creatorAddress])
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen)

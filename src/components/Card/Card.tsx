@@ -27,26 +27,26 @@ interface VideoStreamCardProps {
 export const AnalyticCard = ({ title, views, value, playtimeMins, loading }: AnalyticCardProps) => {
   return (
     <div className="w-full h-full flex flex-col">
-      <div className="border flex flex-col justify-between bg-background-gray border-border-gray rounded-lg p-4 gap-y-5 h-full">
+      <div className="border border-white/20 flex flex-col justify-between bg-white/10 backdrop-blur-sm rounded-lg p-4 gap-y-5 h-full">
         <div>
-          <p className="text-2xl font-bold break-words">{title}</p>
+          <p className="text-2xl font-bold break-words text-white">{title}</p>
         </div>
         {loading ? (
-          <Bars width={25} height={25} color="#3351FF" />
+          <Bars width={25} height={25} color="#A855F7" />
         ) : (
           <div>
             {views ? (
-              <p className="text-4xl font-extrabold tracking-wide">{views} Views</p>
+              <p className="text-4xl font-extrabold tracking-wide text-white">{views} Views</p>
             ) : (
-              <p className="text-2xl font-bold tracking-wide">{playtimeMins}</p>
+              <p className="text-2xl font-bold tracking-wide text-white">{playtimeMins}</p>
             )}
             <p className="text-xs flex items-center gap-1">
-              <span className="text-black-secondary-text">{value}</span>
+              <span className="text-gray-300">{value}</span>
               <span>
                 {(value ?? 0) < 0 ? (
-                  <BiSolidDownArrow className="text-orange-drop text-xs" />
+                  <BiSolidDownArrow className="text-orange-400 text-xs" />
                 ) : (
-                  <BiSolidUpArrow className="text-green-drop text-xs" />
+                  <BiSolidUpArrow className="text-green-400 text-xs" />
                 )}
               </span>
             </p>
@@ -74,7 +74,7 @@ export const ChannelCard: React.FC<ChannelCardProps> = ({
       <div className="w-full bg-gray rounded-md overflow-hidden relative">
         {loading ? (
           <div className="flex items-center w-full max-sm:h-[220px] h-[300px] lg:h-[200px] justify-center">
-            <p>Loading</p>
+            <p className="text-white">Loading</p>
           </div>
         ) : (
           <Image
@@ -92,12 +92,12 @@ export const ChannelCard: React.FC<ChannelCardProps> = ({
           {status ? (
             <>
               <div className="bg-[#04EB2A] h-[6px] w-[6px] rounded-full" />
-              <span className="text-xs text-black-primary-text font-medium select-none">Live</span>
+              <span className="text-xs text-white font-medium select-none">Live</span>
             </>
           ) : (
             <>
               <div className="bg-gray-200 h-[6px] w-[6px] rounded-full" />
-              <span className="text-xs text-gray-500 font-medium select-none">Idle</span>
+              <span className="text-xs text-gray-300 font-medium select-none">Idle</span>
             </>
           )}
         </div>
@@ -105,18 +105,18 @@ export const ChannelCard: React.FC<ChannelCardProps> = ({
 
       <div className="flex justify-between items-center mt-2">
         <div>
-          <h3 className="font-bold text-black-primary-text text-lg capitalize pt-2 break-words">{title}</h3>
+          <h3 className="font-bold text-white text-lg capitalize pt-2 break-words">{title}</h3>
         </div>
         <div className="ml-auto pt-2">
           {streamId && playbackId && <Popup streamId={streamId} playbackId={playbackId} />}
         </div>
       </div>
       <div>
-        <div className="text-sm text-[#838294] ">Last Active {lastSeen ? lastSeen.toDateString() : ''}</div>
+        <div className="text-sm text-gray-300">Last Active {lastSeen ? lastSeen.toDateString() : ''}</div>
       </div>
       <div className="flex justify-start mt-auto">
         <button
-          className="mt-2 bg-main-blue cursor-pointer text-white py-2 text-sm font-bold px-4 rounded-[6px]"
+          className="mt-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 cursor-pointer text-white py-2 text-sm font-bold px-4 rounded-[6px] transition-all duration-200"
           onClick={goLive}
         >
           Go Live
@@ -141,7 +141,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({ title, imageUrl, createdAt
       <div className="w-full bg-gray-200 rounded-md overflow-hidden relative">
         {loading ? (
           <div className="flex items-center w-full max-sm:h-[220px] h-[300px] lg:h-[200px] justify-center">
-            <p>Loading</p>
+            <p className="text-gray-800">Loading</p>
           </div>
         ) : (
           <Image
@@ -163,7 +163,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({ title, imageUrl, createdAt
       </div>
       <div className="flex justify-between items-center mt-2">
         <div>
-          <h2 className="font-bold text-black-primary-text text-lg capitalize pt-2 break-words">
+          <h2 className="font-bold text-white text-lg capitalize pt-2 break-words">
             {title}
             {format ? `.${format}` : ''}
           </h2>
@@ -173,7 +173,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({ title, imageUrl, createdAt
         </div>
       </div>
       <div className="flex justify-start">
-        <p className="text-sm text-gray-500">{createdAt ? createdAt.toDateString() : ''}</p>
+        <p className="text-sm text-gray-300">{createdAt ? createdAt.toDateString() : ''}</p>
       </div>
     </div>
   );

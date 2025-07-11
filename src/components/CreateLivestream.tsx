@@ -172,7 +172,7 @@ export function CreateLivestream({ close }: { close: () => void }) {
 
         {/* Stream Name */}
         <div className="flex flex-col">
-          <label className="text-sm pb-1 font-medium">Stream Name</label>
+          <label className="text-sm pb-1 text-white font-medium">Stream Name</label>
           <InputField
             type="text"
             name="streamName"
@@ -186,7 +186,7 @@ export function CreateLivestream({ close }: { close: () => void }) {
 
         {/* Record Option */}
         <div className="flex flex-col">
-          <label className="text-sm pb-1 font-medium">Record Stream?</label>
+          <label className="text-sm pb-1 text-white font-medium">Record Stream?</label>
           <select
             name="record"
             value={formData.record ? 'yes' : 'no'}
@@ -200,7 +200,7 @@ export function CreateLivestream({ close }: { close: () => void }) {
 
         {/* View Mode */}
         <div className="flex flex-col">
-          <label className="text-sm pb-1 font-medium">View Mode</label>
+          <label className="text-sm pb-1 text-white font-medium">View Mode</label>
           <div className="flex gap-2 flex-wrap">
             {(['free', 'one-time', 'monthly'] as viewMode[]).map((option) => (
               <button
@@ -221,7 +221,7 @@ export function CreateLivestream({ close }: { close: () => void }) {
         {/* Amount */}
         {formData.viewMode !== 'free' && (
           <div className="flex flex-col">
-            <label className="text-sm pb-1 font-medium">Amount($)</label>
+            <label className="text-sm pb-1 text-white font-medium">Amount($)</label>
             <InputField
               label="Amount"
               name="amount"
@@ -239,7 +239,7 @@ export function CreateLivestream({ close }: { close: () => void }) {
 
         {/* Creator ID */}
         <div className="flex flex-col">
-          <label htmlFor="creatorId" className="block text-sm font-medium pb-1 text-gray-900">
+          <label htmlFor="creatorId" className="block text-sm font-medium pb-1 text-white">
             Creator ID
           </label>
           <InputField
@@ -254,7 +254,7 @@ export function CreateLivestream({ close }: { close: () => void }) {
 
         {/* Channel Description (textarea) */}
         <div className="flex flex-col">
-          <label className="text-sm pb-1 font-medium">
+          <label className="text-sm pb-1 text-white font-medium">
             Channel Description <span className="text-xs text-gray-500">(min 20 character)</span>
           </label>
           <textarea
@@ -271,7 +271,7 @@ export function CreateLivestream({ close }: { close: () => void }) {
           {errors.channelDescription && <p className="text-red-500 text-xs">{errors.channelDescription}</p>}
         </div>
         <div className="flex flex-col">
-          <label className="text-sm pb-1 font-medium text-black">Donation Presets</label>
+          <label className="text-sm pb-1 text-white font-medium">Donation Presets</label>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
             {presetValues.map((value, i) => (
               <input
@@ -291,7 +291,7 @@ export function CreateLivestream({ close }: { close: () => void }) {
         <div className="grid grid-cols-2 gap-4">
           {/* Background Color */}
           <div className="flex flex-col">
-            <label className="text-sm pb-1 font-medium">Background Color</label>
+            <label className="text-sm pb-1 text-white font-medium">Background Color</label>
             <div className="flex items-center gap-2 wrap">
               {presetBg.map((color) => (
                 <button
@@ -316,7 +316,7 @@ export function CreateLivestream({ close }: { close: () => void }) {
           </div>
           {/* Text Color */}
           <div className="flex flex-col">
-            <label className="text-sm pb-1 font-medium">Text Color</label>
+            <label className="text-sm pb-1 text-white font-medium">Text Color</label>
             <div className="flex items-center gap-2 wrap">
               {presetText.map((color) => (
                 <button
@@ -343,7 +343,7 @@ export function CreateLivestream({ close }: { close: () => void }) {
 
         {/* Font Size */}
         <div className="flex flex-col">
-          <label className="text-sm pb-1 font-medium">Font Size ({formData.fontSize}px)</label>
+          <label className="text-sm pb-1 text-white  font-medium">Font Size ({formData.fontSize}px)</label>
           <input
             type="range"
             name="fontSize"

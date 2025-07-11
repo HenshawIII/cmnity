@@ -33,7 +33,7 @@ const Analytics = () => {
   };
 
   return (
-    <div className="grid bg-white grid-cols-2 gap-6 md:grid-cols-4 p-3 md:p-6 rounded-lg">
+    <div className="grid bg-white/10 backdrop-blur-sm border border-white/20 grid-cols-2 gap-6 md:grid-cols-4 p-3 md:p-6 rounded-lg">
       {insightsData.map((insightsData) => (
         <AnalyticCard key={insightsData.title} {...insightsData} loading={isLoading} />
       ))}
@@ -43,8 +43,8 @@ const Analytics = () => {
             <li
               key={filter}
               className={clsx(
-                'text-sm pl-2 py-1 text-black-tertiary-text cursor-pointer font-semibold',
-                activeFilter === filter && 'border-l-4 text-black-primary-text border-main-blue',
+                'text-sm pl-2 py-1 text-gray-300 cursor-pointer font-semibold hover:text-white transition-colors',
+                activeFilter === filter && 'border-l-4 text-white border-purple-400',
               )}
               onClick={() => handleFilterChange(filter as 'all' | 'month' | 'year')}
             >
@@ -53,7 +53,7 @@ const Analytics = () => {
           ))}
           <div className="flex justify-start items-end w-2/3 h-full">
             <button
-              className="w-full font-semibold text-black-primary-text text-sm flex justify-center items-center py-2 border bg-background-gray rounded-md self-end"
+              className="w-full font-semibold text-white text-sm flex justify-center items-center py-2 border border-white/20 bg-white/10 backdrop-blur-sm rounded-md self-end hover:bg-white/20 transition-colors"
               onClick={() => handleFilterChange('all')}
             >
               View All

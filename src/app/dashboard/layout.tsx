@@ -3,12 +3,9 @@ import Sidebar from '@/components/Sidebar';
 import AuthGuard from '@/components/AuthGuard';
 import React, { useEffect, useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
-import { Inter } from 'next/font/google';
 import { LuArrowLeftFromLine, LuArrowRightFromLine } from 'react-icons/lu';
 import clsx from 'clsx';
 import { X } from 'lucide-react';
-
-const inter = Inter({ subsets: ['latin'] });
 
 const DashboardLayout = ({
   children,
@@ -55,12 +52,12 @@ const DashboardLayout = ({
 
   return (
     <AuthGuard>
-      <div className={`${inter.className} text-black-primary-text flex h-screen`}>
+      <div className="text-white flex h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 font-sans">
         {/* Sidebar for desktop */}
 
         <aside
           className={clsx(
-            ' md:relative z-20 h-full md:block px-4 gap-y-4 transition-all duration-300 ease-in-out bg-white border-r border-[#dfe0e1] flex flex-col',
+            'md:relative z-20 h-full md:block px-4 gap-y-4 transition-all duration-300 ease-in-out border-r border-white/20 flex flex-col bg-white/10 backdrop-blur-sm',
             {
               'w-[100px]': sidebarCollapsed && !isMobile, // Collapsed sidebar for desktop
               'w-72 p-4': !sidebarCollapsed && !isMobile, // Expanded sidebar for desktop
@@ -68,19 +65,18 @@ const DashboardLayout = ({
               block: isMobile && mobileMenuOpen,
             },
           )}
-          // className={`${mobileMenuOpen ? "block" : "hidden"} md:block fixed md:relative z-20 h-full transition-all duration-300 ease-in-out ${sidebarCollapsed ? "w-[70px]" : "w-[200px]"} bg-white border-r border-[#dfe0e1] flex flex-col`}
         >
-          <div className="flex items-center justify-between py-4 border-b border-[#dfe0e1]">
+          <div className="flex items-center justify-between py-4 border-b border-white/20">
             {!sidebarCollapsed && (
-              <div className=" transition-all ease-in-out duration-500 font-bold flex justify-center items-center uppercase text-black-primary-text">
+              <div className="transition-all ease-in-out duration-500 font-bold flex justify-center items-center uppercase text-white">
                 <h1>Creator Dashboard</h1>
               </div>
             )}
-            <button onClick={toggleSidebar} className="ml-auto">
+            <button onClick={toggleSidebar} className="ml-auto text-gray-300 hover:text-white transition-colors">
               {sidebarCollapsed ? (
-                <LuArrowRightFromLine className="h-5 w-5 text-[#53525f]" />
+                <LuArrowRightFromLine className="h-5 w-5" />
               ) : (
-                <LuArrowLeftFromLine className="h-5 w-5 text-[#53525f]" />
+                <LuArrowLeftFromLine className="h-5 w-5" />
               )}
             </button>
           </div>
@@ -91,8 +87,8 @@ const DashboardLayout = ({
         {/* Main content area */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Pass state values as props to children */}
-          <main className="flex-1 text-orange overflow-x-hidden overflow-y-auto bg-gray-50">
-            <div className="container mx-auto px-1 ">{children}</div>
+          <main className="flex-1 overflow-x-hidden overflow-y-auto">
+            <div className="container mx-auto px-1">{children}</div>
           </main>
         </div>
       </div>

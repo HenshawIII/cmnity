@@ -130,22 +130,22 @@ export const Popup = ({ playbackId, streamId }: PopupProps) => {
             <BsThreeDotsVertical className="text-lg cursor-pointer text-black-primary-text focus:bg-main-blue focus:ring-2 focus:ring-offset-2" />
           </button>
         </DropdownMenu.Trigger>
-        <DropdownMenu.Content className="min-w-[200px] min-h-[200px] z-50 bg-white rounded shadow-md p-2">
-          <DropdownMenu.Item onSelect={handleEditDetails} className={listItemClassNames.option}>
-            <HiLink className={listItemClassNames.icon} />
-            <p className="ml-2 text-sm text-black-primary-text font-medium">Edit Livestream/Channel</p>
+        <DropdownMenu.Content className="min-w-[200px] min-h-[200px] z-50 bg-white rounded shadow-md p-2 ">
+          <DropdownMenu.Item onSelect={handleEditDetails} className={`${listItemClassNames.option}  `}>
+            <HiLink className={`${listItemClassNames.icon} text-main-blue`} />
+            <p className="ml-2 text-sm text-black font-medium">Edit Livestream/Channel</p>
           </DropdownMenu.Item>
           <DropdownMenu.Item onSelect={handleCopyStreamLink} className={listItemClassNames.option}>
-            <AiOutlineEdit className={listItemClassNames.icon} />
-            <p className="ml-2 text-sm font-medium text-black-primary-text">Copy Stream Link</p>
+            <AiOutlineEdit className={`${listItemClassNames.icon} text-green-500`} />
+            <p className="ml-2 text-sm font-medium text-black">Copy Stream Link</p>
           </DropdownMenu.Item>
           <DropdownMenu.Item onSelect={handleScheduleStream} className={listItemClassNames.option}>
-            <PiCalendarCheckBold className={listItemClassNames.icon} />
-            <p className="ml-2 text-sm font-medium text-black-primary-text">Schedule stream</p>
+            <PiCalendarCheckBold className={`${listItemClassNames.icon} text-blue-500`} />
+            <p className="ml-2 text-sm font-medium text-black">Schedule stream</p>
           </DropdownMenu.Item>
           <DropdownMenu.Item onSelect={handleDeleteChannel} className={listItemClassNames.option}>
             <RiDeleteBin6Line className={`${listItemClassNames.icon} text-red-700`} />
-            <p className="ml-2 text-sm font-medium text-black-primary-text">Delete channel</p>
+            <p className="ml-2 text-sm font-medium text-black">Delete channel</p>
           </DropdownMenu.Item>
         </DropdownMenu.Content>
       </DropdownMenu.Root>

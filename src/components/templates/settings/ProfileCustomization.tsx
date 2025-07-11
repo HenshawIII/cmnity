@@ -202,7 +202,7 @@ export function ProfileCustomization() {
   if (loading) {
     return (
       <div className="flex justify-center py-8">
-        <Bars width={40} height={40} color="#3351FF" />
+        <Bars width={40} height={40} color="#A855F7" />
       </div>
     );
   }
@@ -211,32 +211,32 @@ export function ProfileCustomization() {
 
   return (
     <div className="space-y-6">
-      <div className="border-b pb-4">
-        <h3 className="text-xl font-bold mb-2">Creator Profile</h3>
-        <p className="text-gray-600">Customize your public profile that viewers will see</p>
+      <div className="border-b border-white/20 pb-4">
+        <h3 className="text-xl font-bold mb-2 text-white">Creator Profile</h3>
+        <p className="text-gray-300">Customize your public profile that viewers will see</p>
       </div>
 
       {/* Profile URL Section - only show if required fields are filled */}
       {hasRequiredFields && (
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <h4 className="font-semibold mb-2">Your Profile URL</h4>
+        <div className="bg-white/10 backdrop-blur-sm border border-white/20 p-4 rounded-lg">
+          <h4 className="font-semibold mb-2 text-white">Your Profile URL</h4>
           <div className="flex items-center space-x-2">
             <input
               type="text"
               value={profileUrl}
               readOnly
-              className="flex-1 p-2 border rounded bg-white"
+              className="flex-1 p-2 border border-white/20 bg-white/10 backdrop-blur-sm rounded text-white"
             />
             <button
               onClick={handleCopyUrl}
-              className="p-2 bg-main-blue text-white rounded hover:bg-blue-600 transition-colors"
+              className="p-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded transition-colors"
               title="Copy URL"
             >
               <Copy className="w-4 h-4" />
             </button>
             <button
               onClick={handlePreview}
-              className="p-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+              className="p-2 bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded hover:bg-white/20 transition-colors"
               title="Preview Profile"
             >
               <ExternalLink className="w-4 h-4" />
@@ -247,45 +247,45 @@ export function ProfileCustomization() {
 
       {/* Basic Information */}
       <div className="space-y-4">
-        <h4 className="font-semibold">Basic Information</h4>
+        <h4 className="font-semibold text-white">Basic Information</h4>
         
         <div>
-          <label className="block text-sm font-medium mb-1">
-            Display Name <span className="text-red-500">*</span>
+          <label className="block text-sm font-medium mb-1 text-white">
+            Display Name <span className="text-red-400">*</span>
           </label>
           <InputField
             type="text"
             value={profileData.displayName}
             onChange={(e) => handleInputChange('displayName', e.target.value)}
             placeholder="Enter your display name"
-            className={`w-full ${errors.displayName ? 'border-red-500' : ''}`}
+            className={`w-full bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder-gray-400 ${errors.displayName ? 'border-red-400' : ''}`}
           />
           {errors.displayName && (
-            <p className="text-red-500 text-xs mt-1">{errors.displayName}</p>
+            <p className="text-red-400 text-xs mt-1">{errors.displayName}</p>
           )}
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">
-            Bio <span className="text-red-500">*</span>
+          <label className="block text-sm font-medium mb-1 text-white">
+            Bio <span className="text-red-400">*</span>
           </label>
           <textarea
             value={profileData.bio}
             onChange={(e) => handleInputChange('bio', e.target.value)}
             placeholder="Tell viewers about yourself..."
-            className={`w-full p-3 border rounded-lg resize-none h-24 ${errors.bio ? 'border-red-500' : ''}`}
+            className={`w-full p-3 border border-white/20 bg-white/10 backdrop-blur-sm rounded-lg resize-none h-24 text-white placeholder-gray-400 ${errors.bio ? 'border-red-400' : ''}`}
             maxLength={500}
           />
           <div className="flex justify-between items-center mt-1">
-            <p className="text-xs text-gray-500">{profileData.bio.length}/500 characters</p>
+            <p className="text-xs text-gray-300">{profileData.bio.length}/500 characters</p>
             {errors.bio && (
-              <p className="text-red-500 text-xs">{errors.bio}</p>
+              <p className="text-red-400 text-xs">{errors.bio}</p>
             )}
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Profile Picture</label>
+          <label className="block text-sm font-medium mb-1 text-white">Profile Picture</label>
           <div className="flex items-center space-x-4">
             {profileData.avatar && (
               <img
@@ -298,7 +298,7 @@ export function ProfileCustomization() {
               type="file"
               accept="image/*"
               onChange={handleAvatarUpload}
-              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-main-blue file:text-white hover:file:bg-blue-600"
+              className="block w-full text-sm text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gradient-to-r file:from-purple-600 file:to-pink-600 hover:file:from-purple-700 hover:file:to-pink-700 file:text-white"
             />
           </div>
         </div>
@@ -306,151 +306,69 @@ export function ProfileCustomization() {
 
       {/* Social Links */}
       <div className="space-y-4">
-        <h4 className="font-semibold">Social Links <span className="text-sm font-normal text-gray-500">(Optional)</span></h4>
+        <h4 className="font-semibold text-white">Social Links <span className="text-sm font-normal text-gray-300">(Optional)</span></h4>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Twitter </label>
+            <label className="block text-sm font-medium mb-1 text-white">Twitter </label>
             <InputField
               type="url"
               value={profileData.socialLinks?.twitter || ''}
               onChange={(e) => handleSocialLinkChange('twitter', e.target.value)}
               placeholder="https://twitter.com/username"
-              className="w-full"
+              className="w-full bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder-gray-400"
             />
           </div>
           
           <div>
-            <label className="block text-sm font-medium mb-1">Instagram </label>
+            <label className="block text-sm font-medium mb-1 text-white">Instagram </label>
             <InputField
               type="url"
               value={profileData.socialLinks?.instagram || ''}
               onChange={(e) => handleSocialLinkChange('instagram', e.target.value)}
               placeholder="https://instagram.com/username"
-              className="w-full"
+              className="w-full bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder-gray-400"
             />
           </div>
           
           <div>
-            <label className="block text-sm font-medium mb-1">YouTube </label>
+            <label className="block text-sm font-medium mb-1 text-white">YouTube </label>
             <InputField
               type="url"
               value={profileData.socialLinks?.youtube || ''}
               onChange={(e) => handleSocialLinkChange('youtube', e.target.value)}
               placeholder="https://youtube.com/@channel"
-              className="w-full"
+              className="w-full bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder-gray-400"
             />
           </div>
           
           <div>
-            <label className="block text-sm font-medium mb-1">Website</label>
+            <label className="block text-sm font-medium mb-1 text-white">Website</label>
             <InputField
               type="url"
               value={profileData.socialLinks?.website || ''}
               onChange={(e) => handleSocialLinkChange('website', e.target.value)}
               placeholder="https://yourwebsite.com"
-              className="w-full"
+              className="w-full bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder-gray-400"
             />
           </div>
         </div>
       </div>
 
-      {/* Theme Customization */}
-      {/* <div className="space-y-4">
-        <h4 className="font-semibold">Theme Customization</h4>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Background Color</label>
-            <div className="flex items-center space-x-2">
-              <input
-                type="color"
-                value={profileData?.theme?.backgroundColor}
-                onChange={(e) => handleThemeChange('backgroundColor', e.target.value)}
-                className="w-12 h-10 border rounded"
-              />
-              <InputField
-                type="text"
-                value={profileData?.theme?.backgroundColor}
-                onChange={(e) => handleThemeChange('backgroundColor', e.target.value)}
-                className="flex-1"
-              />
-            </div>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium mb-1">Text Color</label>
-            <div className="flex items-center space-x-2">
-              <input
-                type="color"
-                value={profileData?.theme?.textColor}
-                onChange={(e) => handleThemeChange('textColor', e.target.value)}
-                className="w-12 h-10 border rounded"
-              />
-              <InputField
-                type="text"
-                value={profileData?.theme?.textColor}
-                onChange={(e) => handleThemeChange('textColor', e.target.value)}
-                className="flex-1"
-              />
-            </div>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium mb-1">Accent Color</label>
-            <div className="flex items-center space-x-2">
-              <input
-                type="color"
-                value={profileData?.theme?.accentColor}
-                onChange={(e) => handleThemeChange('accentColor', e.target.value)}
-                className="w-12 h-10 border rounded"
-              />
-              <InputField
-                type="text"
-                value={profileData?.theme?.accentColor}
-                onChange={(e) => handleThemeChange('accentColor', e.target.value)}
-                className="flex-1"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Privacy Settings */}
-      {/* <div className="space-y-4">
-        <h4 className="font-semibold">Privacy Settings</h4>
-        
-        <div className="flex items-center space-x-3">
-          <input
-            type="checkbox"
-            id="isPublic"
-            checked={profileData?.isPublic}
-            onChange={(e) => handleInputChange('isPublic', e.target.checked.toString())}
-            className="w-4 h-4 text-main-blue bg-gray-100 border-gray-300 rounded focus:ring-main-blue"
-          />
-          <label htmlFor="isPublic" className="text-sm font-medium">
-            Make my profile public
-          </label>
-        </div>
-        <p className="text-xs text-gray-500">
-          When enabled, your profile will be visible to anyone with the link
-        </p>
-      </div> */}
-
       {/* Save Button */}
-      <div className="flex justify-end pt-4 border-t">
+      <div className="flex justify-end pt-4 border-t border-white/20">
         <button
           onClick={handleSave}
           disabled={saving}
-          className="px-6 py-2 bg-main-blue text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {saving ? (
             <div className="flex items-center space-x-2">
               <Bars width={16} height={16} color="#ffffff" />
-              <span>{isExistingProfile ? 'Updating...' : 'Saving...'}</span>
+              <span>Saving...</span>
             </div>
           ) : (
-            isExistingProfile ? 'Update Profile' : 'Save Profile'
+            'Save Profile'
           )}
         </button>
       </div>

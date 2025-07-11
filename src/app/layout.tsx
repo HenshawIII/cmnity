@@ -1,10 +1,10 @@
 'use client';
 
 // import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+//  import { Inter } from 'next/font/google';
 import { Toaster } from 'sonner';
 import React from 'react';
-const inter = Inter({ subsets: ['latin'] });
+// const inter = Inter({ subsets: ['latin'] });
 import './globals.css';
 // import Providers from './providers';
 // import { headers } from 'next/headers';
@@ -35,9 +35,8 @@ export default function RootLayout({
         <meta name="description" content="Switch TV" />
         <link rel="icon" href="/assets/images/favicon.ico" />
       </head>
-      <body className={`${inter.className} antialiased`}>
-        <SolanaProvider customRpcUrl="https://solana-mainnet.g.alchemy.com/v2/8rgdAH9Vy_zuXQFA2hedqK_a_3GAxvuZ">
-        <Provider store={store}>
+      <body className={` antialiased`}>
+       
           <PrivyProvider
       appId={process.env.NEXT_PUBLIC_PRIVY_ENVIRONMENT_ID ?? ''}
       config={{
@@ -51,16 +50,20 @@ export default function RootLayout({
           // showWalletLoginFirst: false,
           walletChainType:'solana-only',
           walletList: [ 'phantom'],
-        }
+        },
+        loginMethods:['wallet','email','google','farcaster'],
       }}
     >
+       <SolanaProvider customRpcUrl="https://solana-mainnet.g.alchemy.com/v2/8rgdAH9Vy_zuXQFA2hedqK_a_3GAxvuZ">
+       <Provider store={store}>
           <main>
             <Toaster position="top-center" richColors />
             {children}
           </main>
-          </PrivyProvider>
+         
         </Provider>
         </SolanaProvider>
+        </PrivyProvider>
       </body>
     </html>
   );
