@@ -130,7 +130,9 @@ export function CreateLivestream({ close }: { close: () => void }) {
       const response = await dispatch(createLivestream(payload)).unwrap();
       console.log('Stream created successfully:', response);
       toast.success('Stream created');
-      dispatch(getAllStreams());
+      setTimeout(() => {
+        dispatch(getAllStreams());
+      }, 1000);
       dispatch(resetStreamStatus());
       close();
     } catch (err: any) {

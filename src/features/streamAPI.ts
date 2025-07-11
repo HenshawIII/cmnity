@@ -2,6 +2,7 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import { InputCreatorIdType } from 'livepeer/models/components';
 import api from '../utils/api'; // Assuming you have an axios instance setup
 import axios from 'axios';
+import { Livepeer } from 'livepeer';
 
 interface CreateLivestreamProps {
   streamName: string;
@@ -24,6 +25,10 @@ interface UpdateLivestreamProps {
   name?: string;
   suspended?: boolean;
 }
+
+// const livepeer = new Livepeer({
+//   apiKey: process.env.NEXT_PUBLIC_STUDIO_API_KEY ?? '',
+// });
 
 export const createLivestream = createAsyncThunk(
   'streams/createLivestream',
