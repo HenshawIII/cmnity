@@ -15,7 +15,8 @@ interface SidebarProps {
 const Sidebar = ({ sidebarCollapsed }: SidebarProps) => {
   const pathname = usePathname();
   const links = [
-    { href: '/dashboard', icon: TbHomeFilled, text: 'Home' },
+    { href: '/', icon: TbHomeFilled, text: 'Home' },
+    { href: '/dashboard', icon: BsFillBarChartLineFill, text: 'Dashboard' },
     // { href: '/dashboard/stream', icon: CiStreamOn, text: 'Stream' },
     // {
     //   href: '/dashboard/customise-channel',
