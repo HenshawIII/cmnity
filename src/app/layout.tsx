@@ -15,6 +15,7 @@ import { SolanaProvider } from '@/context/solProv';
 import { PrivyProvider } from '@privy-io/react-auth';
 import {Provider} from 'react-redux';
 import store from '../store/store';
+import { toSolanaWalletConnectors } from '@privy-io/react-auth/solana';
 
 // export const metadata: Metadata = {
 //   title: 'Switch TV',
@@ -36,7 +37,7 @@ export default function RootLayout({
         <link rel="icon" href="/assets/images/favicon.ico" />
       </head>
       <body className={` antialiased`}>
-       
+      <SolanaProvider customRpcUrl="https://solana-mainnet.g.alchemy.com/v2/8rgdAH9Vy_zuXQFA2hedqK_a_3GAxvuZ">
           <PrivyProvider
       appId={process.env.NEXT_PUBLIC_PRIVY_ENVIRONMENT_ID ?? ''}
       config={{
@@ -50,11 +51,13 @@ export default function RootLayout({
           // showWalletLoginFirst: false,
           walletChainType:'solana-only',
           walletList: [ 'phantom'],
+        
         },
+        externalWallets: {solana: {connectors: toSolanaWalletConnectors()}},
         loginMethods:['wallet','email','google','farcaster'],
       }}
     >
-       <SolanaProvider customRpcUrl="https://solana-mainnet.g.alchemy.com/v2/8rgdAH9Vy_zuXQFA2hedqK_a_3GAxvuZ">
+       
        <Provider store={store}>
           <main>
             <Toaster position="top-center" richColors />
@@ -62,8 +65,8 @@ export default function RootLayout({
           </main>
          
         </Provider>
-        </SolanaProvider>
         </PrivyProvider>
+        </SolanaProvider>
       </body>
     </html>
   );
