@@ -32,7 +32,7 @@ import type { StaticImageData } from 'next/image';
 import Image from 'next/image';
 import { Gift, Smile } from 'lucide-react';
 import { StreamGateModal } from './StreamGateModal';
-// import { StreamPayment } from './StreamPayment';
+import { StreamPayment } from './StreamPayment';
 import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 
@@ -69,7 +69,7 @@ export function PlayerWithControls({
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const { viewerMetrics: totalViewers } = useViewMetrics({ playbackId });
-  const { publicKey, sendTransaction, connected } = useWallet();
+  const { publicKey, sendTransaction, connected, wallet , wallets } = useWallet();
   const { connection } = useConnection();
   const [message, setMessage] = useState<string | null>(null);
   const { assets, error: assetsError } = useSelector((s: RootState) => s.assets);
@@ -77,7 +77,7 @@ export function PlayerWithControls({
   const [products, setProducts] = useState<Product[]>([]);
   const [productsLoading, setProductsLoading] = useState(false);
   const [productsError, setProductsError] = useState<string | null>(null);
-  const { stream, loading, error, hasAccess, setHasAccess, markPaid } = useStreamGate(playbackId);
+  const { stream, loading, error, hasAccess, setHasAccess, markPaid, processPayment, processingPayment, walletReady } = useStreamGate(playbackId);
   const filteredAssets = useMemo(() => assets.filter((a) => !!a.playbackId && a.creatorId?.value === id), [assets, id]);
   const host = process.env.NEXT_PUBLIC_BASE_URL;
   const playbackUrl =
@@ -91,6 +91,8 @@ export function PlayerWithControls({
   const [chatInput, setChatInput] = useState('');
   const chatEndRef = useRef<HTMLDivElement | null>(null);
 
+
+  // console.log("these are the wallets",wallet) 
   const handleCopyLink = useCallback(async () => {
     if (!playbackUrl) return toast.error('No playback URL available');
     try {
@@ -231,26 +233,31 @@ export function PlayerWithControls({
     return <div className="text-center text-red-500 mt-10">{error}</div>;
   }
 
-  // // 3. If not allowed yet, show gate modal
-  // if (!hasAccess && stream?.viewMode !== 'free') {
-  //   return (
-  //     <StreamGateModal
-  //       open={!hasAccess}
-  //       onClose={() => router.back()}
-  //       title="Locked Stream"
-  //       description={`A one-time fee of $${stream?.amount.toFixed(2)} unlocks access.`}
-  //     >
-  //       <StreamPayment
-  //         stream={stream as any}
-  //         onPaid={(addr) => {
-  //           setHasAccess(true);
-  //           markPaid(addr);
-  //         }}
-  //       />
-  //     </StreamGateModal>
-  //   );
-  // }
-
+  // 3. Gate modal for paid streams
+  if (!hasAccess && stream && stream.viewMode !== 'free') {
+    return (
+      <StreamGateModal
+        open={!hasAccess}
+        onClose={() => router.back()}
+        title="Locked Stream"
+      >
+        <StreamPayment
+          playbackId={playbackId}
+          usdAmount={stream.amount}
+          recipientAddress={stream.creatorId}
+          onPaymentSuccess={() => {
+            setHasAccess(true);
+            if (publicKey) {
+              markPaid(publicKey.toBase58());
+            }
+          }}
+          processPayment={processPayment}
+          processingPayment={processingPayment}
+          walletReady={walletReady}
+        />
+      </StreamGateModal>
+    );
+  }
 
   return (
     <div

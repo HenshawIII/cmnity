@@ -92,7 +92,8 @@ export function BroadcastWithControls({ streamName, streamKey, playbackId }: Str
     }
   }, [stream]);
 
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isCustomizeOpen, setIsCustomizeOpen] = useState(false);
+  const [isAdsOpen, setIsAdsOpen] = useState(false);
   const [sessionTime, setSessionTime] = useState('00:00:00');
   const [showChat, setShowChat] = useState(true);
   const [showInfo, setShowInfo] = useState(false);
@@ -201,12 +202,34 @@ export function BroadcastWithControls({ streamName, streamKey, playbackId }: Str
 
   useEffect(() => {
     if (!playbackId) return;
-    const interval = setInterval(() => {
-      dispatch(fetchChatMessages(playbackId));
-    }, 5000); // fetch every 3 seconds
 
-    return () => clearInterval(interval);
-  }, [dispatch, playbackId]);
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
+    const tick = async () => {
+      if (document.visibilityState === 'visible' && !isCustomizeOpen) {
+        await dispatch(fetchChatMessages(playbackId));
+      }
+      if (!cancelled) {
+        timer = setTimeout(tick, 5000);
+      }
+    };
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible' && !isCustomizeOpen) {
+        dispatch(fetchChatMessages(playbackId));
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibility);
+    tick();
+
+    return () => {
+      cancelled = true;
+      if (timer) clearTimeout(timer);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
+  }, [dispatch, playbackId, isCustomizeOpen]);
 
   if (detailsLoading) {
     return (
@@ -282,6 +305,8 @@ export function BroadcastWithControls({ streamName, streamKey, playbackId }: Str
                     logo: customization.logo,
                   }}
                   onSave={(updated) => setCustomization(updated)}
+                  open={isCustomizeOpen}
+                  onOpenChange={setIsCustomizeOpen}
                 />
               </div>
             </div>
@@ -486,7 +511,7 @@ export function BroadcastWithControls({ streamName, streamKey, playbackId }: Str
                     {showAds && (
                       <div className="h-[calc(100vh-400px)] overflow-y-auto p-4">
                         <h4 className="text-sm text-gray-500 mb-3">Video</h4>
-                        <Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                        <Dialog.Root open={isAdsOpen} onOpenChange={setIsAdsOpen}>
                           <Dialog.Trigger asChild>
                             <div className="border rounded-md p-2">
                               <div className="bg-gray-200 h-24 rounded-md flex items-center justify-center text-blue-500 text-2xl">
@@ -500,7 +525,7 @@ export function BroadcastWithControls({ streamName, streamKey, playbackId }: Str
                               <Dialog.Title className="text-black-primary-text text-center flex items-center gap-2 my-4 text-xl font-bold">
                                 <RiVideoAddLine className="text-main-blue text-l" /> Upload Video Ads
                               </Dialog.Title>
-                              <UploadAdsAsset onClose={() => setIsDialogOpen(false)} />
+                              <UploadAdsAsset onClose={() => setIsAdsOpen(false)} />
                               <Dialog.Close asChild>
                                 <button
                                   className="absolute right-2.5 top-2.5 inline-flex size-[25px] appearance-none items-center justify-center rounded-full text-violet11 hover:bg-violet4 focus:shadow-[0_0_0_2px] focus:shadow-violet7 focus:outline-none"
@@ -549,7 +574,7 @@ export function BroadcastWithControls({ streamName, streamKey, playbackId }: Str
                     <div className="p-4">
                       <h4 className="text-sm text-gray-500 mb-3 mt-6">Picture-in-picture</h4>
                       <div className="grid grid-cols-4 gap-4">
-                        <Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                        <Dialog.Root open={isAdsOpen} onOpenChange={setIsAdsOpen}>
                           <Dialog.Trigger asChild>
                             <div className="border rounded-md p-2">
                               <div className="bg-gray-200 h-24 rounded-md flex items-center justify-center text-blue-500 text-2xl">
@@ -563,7 +588,7 @@ export function BroadcastWithControls({ streamName, streamKey, playbackId }: Str
                               <Dialog.Title className="text-black-primary-text text-center flex items-center gap-2 my-4 text-xl font-bold">
                                 <RiVideoAddLine className="text-main-blue text-l" /> Upload Video Ads
                               </Dialog.Title>
-                              <UploadAdsAsset onClose={() => setIsDialogOpen(false)} />
+                              <UploadAdsAsset onClose={() => setIsAdsOpen(false)} />
                               <Dialog.Close asChild>
                                 <button
                                   className="absolute right-2.5 top-2.5 inline-flex size-[25px] appearance-none items-center justify-center rounded-full text-violet11 hover:bg-violet4 focus:shadow-[0_0_0_2px] focus:shadow-violet7 focus:outline-none"
@@ -593,7 +618,7 @@ export function BroadcastWithControls({ streamName, streamKey, playbackId }: Str
                   <p className="text-center text-gray-500 mb-4">Welcome to the chat!</p>
                   <div className="space-y-3">
                     {chatMessages.map((msg, index) => (
-                      <div key={index} className="bg-gray-50 rounded-lg p-3">
+                      <div key={index} className="bg-gray-50 rounded-lg p-3 text-black">
                         <span className={`font-bold ${msg?.sender === creatorId ? 'text-red-600' : 'text-blue-600'}`}>{msg?.sender === creatorId ? 'You' : msg?.sender}:</span>{' '}
                         {msg?.message}
                       </div>
@@ -613,7 +638,7 @@ export function BroadcastWithControls({ streamName, streamKey, playbackId }: Str
                       value={chatInput}
                       onChange={(e) => setChatInput(e.target.value)}
                       placeholder="Send message..."
-                      className="w-full border rounded-md py-2 px-3"
+                      className="w-full border rounded-md py-2 px-3 text-black"
                     />
                     <div className="flex justify-end gap-3">
                       <button type="button" className="p-2">

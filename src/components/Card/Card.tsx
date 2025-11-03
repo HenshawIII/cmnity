@@ -64,6 +64,7 @@ export const ChannelCard: React.FC<ChannelCardProps> = ({
   playbackId,
   image,
   playb,
+  logo,
   lastSeen,
   status,
 }) => {
@@ -78,7 +79,7 @@ export const ChannelCard: React.FC<ChannelCardProps> = ({
           </div>
         ) : (
           <Image
-            src={thumbnailUrl || image}
+            src={logo || thumbnailUrl || image}
             alt={title}
             className="rounded-md w-full max-sm:h-[220px] h-[300px] lg:h-[200px] object-cover"
             width={400}

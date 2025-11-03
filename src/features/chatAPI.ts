@@ -37,7 +37,7 @@ export const fetchChatMessages = createAsyncThunk(
   'chat/fetchMessages',
   async (playbackId: string) => {
     const response = await backendApi.get(`/chat/${playbackId}/fetch`);
-    console.log('fetchChatMessages response:', response.data);
+    // console.log('fetchChatMessages response:', response.data);
     if (Array.isArray(response.data)) {
       return response.data;
     }

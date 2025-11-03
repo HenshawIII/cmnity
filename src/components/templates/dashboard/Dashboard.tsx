@@ -3,6 +3,7 @@ import Header from '@/components/Header';
 import Analytics from './Analytics';
 import SectionCard from '@/components/Card/SectionCard';
 import { ChannelCard, VideoCard } from '@/components/Card/Card';
+import { ChannelCardRedesign } from '@/components/Card/ChannelCardRedesign';
 import { RiVideoAddLine } from 'react-icons/ri';
 import * as Dialog from '@radix-ui/react-dialog';
 import { IoMdClose } from 'react-icons/io';
@@ -21,6 +22,7 @@ import Spinner from '@/components/Spinner';
 import UploadVideoAsset from '@/components/UploadVideoAsset';
 import type { Asset, Stream } from '@/interfaces';
 import MobileSidebar from '@/components/MobileSidebar';
+import { ProfileColumn } from './ProfileColumn';
 
 const Dashboard = () => {
   const { user, ready, authenticated } = usePrivy();
@@ -82,7 +84,7 @@ const filteredStreams = useMemo(() => {
   return streams.filter((stream) => !!stream.playbackId && stream.creatorId?.value === solanaWalletAddress);
 }, [streams, solanaWalletAddress]); 
 
-console.log(filteredStreams);
+// console.log(filteredStreams);
   const filteredAssets = useMemo(() => {
     return assets.filter((asset: Asset) => !!asset.playbackId && asset.creatorId?.value === solanaWalletAddress);
   }, [assets, solanaWalletAddress]);
@@ -120,11 +122,10 @@ console.log(filteredStreams);
       )}
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col h-screen overflow-auto">
-        <Header toggleMenu={toggleMobileMenu} mobileOpen={mobileMenuOpen} />
-
-        <div className="m-2 pb-8">
-          <Analytics />
+      <div className="flex-1 flex gap-4 h-screen overflow-auto">
+        <div className="flex-1 my-2 ml-2 pb-8">
+          {/* <Analytics /> */}
+          <Header toggleMenu={toggleMobileMenu} mobileOpen={mobileMenuOpen} />
           <SectionCard title="Your Channel">
             {streamsLoading ? (
               Array.from({ length: 1 }, (_, index) => (
@@ -137,46 +138,61 @@ console.log(filteredStreams);
                 </div>
               ))
             ) : canCreateStream ? (
-              // Show "Create Channel" dialog if no streams are available
-              <Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <Dialog.Trigger asChild>
-                  <div className="flex w-full flex-col" onClick={() => setIsDialogOpen(true)}>
-                    <div className="w-full justify-center flex items-center h-[180px] rounded-lg cursor-pointer bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-all duration-200">
-                      <RiVideoAddLine className="text-purple-400 w-24 h-24" />
-                    </div>
-                    <div className="text-white text-xl font-bold pt-2">Create new stream channel</div>
+              // Show "Create Channel" message and CTA if no streams are available
+              <>
+                <div className="w-full flex flex-col items-center justify-center p-8 space-y-6 text-center">
+                  <div className="w-32 h-32 rounded-full bg-white/10 flex items-center justify-center border-4 border-dashed border-purple-400/50">
+                    <RiVideoAddLine className="text-purple-400 w-16 h-16" />
                   </div>
-                </Dialog.Trigger>
-                <Dialog.Portal>
-                  <Dialog.Overlay className="fixed inset-0 bg-black/70 backdrop-blur-sm" />
-                  <Dialog.Content className="fixed left-1/2 top-1/2 max-h-[85vh] h-full w-[90vw] overflow-y-auto flex py-16 mt-10 flex-col justify-center items-center max-w-[34rem] -translate-x-1/2 -translate-y-1/2 rounded-xl bg-gray-900/95 backdrop-blur-sm border border-white/20 px-10 max-sm:px-6 shadow-2xl">
-                    <Dialog.Title className="text-white text-center text-xl font-bold">Create New Channel</Dialog.Title>
-
-                    <div className="w-full h-full my-5">
-                      <CreateLivestream close={() => setIsDialogOpen(false)} />
-                    </div>
-
-                    <Dialog.Close asChild>
+                  <div className="space-y-2">
+                    <h3 className="text-white font-bold text-2xl">No Channels Yet</h3>
+                    <p className="text-gray-300 text-sm max-w-md">
+                      Create your first streaming channel to start broadcasting live content to your audience.
+                    </p>
+                  </div>
+                  <Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <Dialog.Trigger asChild>
                       <button
-                        className="absolute right-2.5 top-2.5 inline-flex size-[25px] appearance-none items-center justify-center rounded-full text-white hover:bg-white/10 focus:shadow-[0_0_0_2px] focus:shadow-purple-500 focus:outline-none transition-colors"
-                        aria-label="Close"
+                        onClick={() => setIsDialogOpen(true)}
+                        className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 flex items-center gap-2"
                       >
-                        <IoMdClose className="text-white font-medium text-4xl" />
+                        <RiVideoAddLine className="w-5 h-5" />
+                        Create Channel
                       </button>
-                    </Dialog.Close>
-                  </Dialog.Content>
-                </Dialog.Portal>
-              </Dialog.Root>
+                    </Dialog.Trigger>
+                    <Dialog.Portal>
+                      <Dialog.Overlay className="fixed inset-0 bg-black/70 backdrop-blur-sm" />
+                      <Dialog.Content className="fixed left-1/2 top-1/2 max-h-[85vh] h-full w-[90vw] overflow-y-auto flex py-16 mt-10 flex-col justify-center items-center max-w-[34rem] -translate-x-1/2 -translate-y-1/2 rounded-xl bg-gray-900/95 backdrop-blur-sm border border-white/20 px-10 max-sm:px-6 shadow-2xl">
+                        <Dialog.Title className="text-white text-center text-xl font-bold">Create New Channel</Dialog.Title>
+
+                        <div className="w-full h-full my-5">
+                          <CreateLivestream close={() => setIsDialogOpen(false)} />
+                        </div>
+
+                        <Dialog.Close asChild>
+                          <button
+                            className="absolute right-2.5 top-2.5 inline-flex size-[25px] appearance-none items-center justify-center rounded-full text-white hover:bg-white/10 focus:shadow-[0_0_0_2px] focus:shadow-purple-500 focus:outline-none transition-colors"
+                            aria-label="Close"
+                          >
+                            <IoMdClose className="text-white font-medium text-4xl" />
+                          </button>
+                        </Dialog.Close>
+                      </Dialog.Content>
+                    </Dialog.Portal>
+                  </Dialog.Root>
+                </div>
+              </>
             ) : (
               // Show the single stream if available
               filteredStreams.map((stream) => (
-                <div key={stream.id}>
-                  <ChannelCard
+                <div key={stream.id} className="col-span-full w-full">
+                  <ChannelCardRedesign
                     title={stream.name}
                     image={image1}
+                    logo={stream.logo}
                     goLive={() => initiateLiveVideo(stream.id)}
                     streamId={stream.id}
-                    playbackId={stream.id}  
+                    playbackId={stream.playbackId}  
                     playb={stream.playbackId}
                     lastSeen={new Date(stream.lastSeen || 0)}
                     status={stream.isActive}
@@ -187,34 +203,8 @@ console.log(filteredStreams);
           </SectionCard>
 
           <hr className="border-white/20" />
-          <SectionCard title="Your Videos">
-            <Dialog.Root open={isDialogOpen2} onOpenChange={setIsDialogOpen2}>
-              <Dialog.Trigger asChild>
-                <div className="flex w-full flex-col" onClick={() => setIsDialogOpen2(true)}>
-                  <div className="w-full justify-center flex items-center h-[180px] rounded-lg cursor-pointer bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-all duration-200">
-                    <RiVideoAddLine className="text-purple-400 w-24 h-24" />
-                  </div>
-                  <div className="text-white text-xl font-bold pt-2">Upload Asset</div>
-                </div>
-              </Dialog.Trigger>
-              <Dialog.Portal>
-                <Dialog.Overlay className="fixed inset-0 bg-black/70 backdrop-blur-sm" />
-                <Dialog.Content className="fixed left-1/2 top-1/2 max-h-[85vh] w-[90vw] flex mt-4 flex-col justify-center items-center max-w-[34rem] -translate-x-1/2 -translate-y-1/2 rounded-xl bg-gray-900/95 backdrop-blur-sm border border-white/20 px-10 max-sm:px-6 py-6 shadow-2xl">
-                  <Dialog.Title className="text-white text-center flex items-center gap-2 my-4 text-xl font-bold">
-                    <RiVideoAddLine className="text-purple-400 text-sm" /> Upload Video Asset
-                  </Dialog.Title>
-                  <UploadVideoAsset onClose={() => setIsDialogOpen2(false)} />
-                  <Dialog.Close asChild>
-                    <button
-                      className="absolute right-2.5 top-2.5 inline-flex size-[25px] appearance-none items-center justify-center rounded-full text-white hover:bg-white/10 focus:shadow-[0_0_0_2px] focus:shadow-purple-500 focus:outline-none transition-colors"
-                      aria-label="Close"
-                    >
-                      <IoMdClose className="text-white font-medium text-4xl" />
-                    </button>
-                  </Dialog.Close>
-                </Dialog.Content>
-              </Dialog.Portal>
-            </Dialog.Root>
+          <SectionCard title="Gallery">
+            
 
             {assetsLoading ? (
               Array.from({ length: 5 }, (_, index) => (
@@ -248,7 +238,40 @@ console.log(filteredStreams);
                 )}
               </>
             )}
+
+<Dialog.Root open={isDialogOpen2} onOpenChange={setIsDialogOpen2}>
+              <Dialog.Trigger asChild>
+                <div className="flex w-full flex-col" onClick={() => setIsDialogOpen2(true)}>
+                  <div className="w-full justify-center flex items-center h-[180px] rounded-lg cursor-pointer bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-all duration-200">
+                    <RiVideoAddLine className="text-purple-400 w-24 h-24" />
+                  </div>
+                  <div className="text-white text-xl font-bold pt-2">Upload Asset</div>
+                </div>
+              </Dialog.Trigger>
+              <Dialog.Portal>
+                <Dialog.Overlay className="fixed inset-0 bg-black/70 backdrop-blur-sm" />
+                <Dialog.Content className="fixed left-1/2 top-1/2 max-h-[85vh] w-[90vw] flex mt-4 flex-col justify-center items-center max-w-[34rem] -translate-x-1/2 -translate-y-1/2 rounded-xl bg-gray-900/95 backdrop-blur-sm border border-white/20 px-10 max-sm:px-6 py-6 shadow-2xl">
+                  <Dialog.Title className="text-white text-center flex items-center gap-2 my-4 text-xl font-bold">
+                    <RiVideoAddLine className="text-purple-400 text-sm" /> Upload Video Asset
+                  </Dialog.Title>
+                  <UploadVideoAsset onClose={() => setIsDialogOpen2(false)} />
+                  <Dialog.Close asChild>
+                    <button
+                      className="absolute right-2.5 top-2.5 inline-flex size-[25px] appearance-none items-center justify-center rounded-full text-white hover:bg-white/10 focus:shadow-[0_0_0_2px] focus:shadow-purple-500 focus:outline-none transition-colors"
+                      aria-label="Close"
+                    >
+                      <IoMdClose className="text-white font-medium text-4xl" />
+                    </button>
+                  </Dialog.Close>
+                </Dialog.Content>
+              </Dialog.Portal>
+            </Dialog.Root>
           </SectionCard>
+        </div>
+        
+        {/* Third Column - Profile Column */}
+        <div className="hidden lg:block flex-shrink-0 pt-2 pr-2">
+          <ProfileColumn />
         </div>
       </div>
     </div>

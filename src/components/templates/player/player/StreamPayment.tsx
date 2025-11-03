@@ -1,103 +1,122 @@
-// import axios from 'axios';
-// import { useCallback } from 'react';
-// import { useAccount } from 'wagmi';
-// import { Wallet, ConnectWallet } from '@coinbase/onchainkit/wallet';
-// import {
-//   Transaction,
-//   TransactionButton,
-//   TransactionSponsor,
-//   TransactionStatus,
-//   TransactionStatusLabel,
-//   TransactionStatusAction,
-// } from '@coinbase/onchainkit/transaction';
-// import type { LifecycleStatus } from '@coinbase/onchainkit/transaction';
-// import { usePrivy } from '@privy-io/react-auth';
-// import { Stream } from '@/app/hook/useStreamGate';
+'use client';
 
-// const clickContractAbi = [
-//   {
-//     type: 'function',
-//     name: 'click',
-//     inputs: [],
-//     outputs: [],
-//     stateMutability: 'nonpayable',
-//   },
-// ] as const;
+import { useWallet } from '@solana/wallet-adapter-react';
+import dynamic from 'next/dynamic';
+import { toast } from 'sonner';
+import { useSolPrice } from '@/app/hook/useSolPrice';
+import { formatNumber } from '@/lib/utils';
 
-// Assuming `stream.playbackId` is your contract address:
+const WalletMultiButton = dynamic(
+  async () => (await import('@solana/wallet-adapter-react-ui')).WalletMultiButton,
+  { ssr: false }
+);
 
-// export function StreamPayment({ stream, onPaid }: { stream: any; onPaid: (addr: string) => void }) {
-//   const { login, authenticated, ready } = usePrivy();
-//   // const { address } = useAccount();
+interface StreamPaymentProps {
+  playbackId: string;
+  usdAmount: number;
+  recipientAddress: string;
+  onPaymentSuccess: () => void;
+  processPayment: (solAmount: number, recipientAddress: string) => Promise<any>;
+  processingPayment: boolean;
+  walletReady: boolean;
+}
 
-//   const calls = [
-//     {
-//       //   address: stream.creatorId as `0x${string}`, // contract address
-//       to: stream?.creatorId as `0x${string}`, // contract address
-//       abi: clickContractAbi,
-//       functionName: 'click',
-//       args: [],
-//     },
-//   ];
+export function StreamPayment({ 
+  playbackId, 
+  usdAmount,
+  recipientAddress,
+  onPaymentSuccess, 
+  processPayment,
+  processingPayment,
+  walletReady,
+}: StreamPaymentProps) {
+  const { connected } = useWallet();
+  const { solPrice, loading: priceLoading, usdToSol } = useSolPrice();
+  const solAmount = usdToSol(usdAmount);
 
-//   const handleOnStatus = useCallback(
-//     async (status: LifecycleStatus) => {
-//       if (status.statusName === 'success' && address) {
-//         // 1) register on your backend
-//         await axios.post('/addpayinguser', {
-//           playbackId: stream?.playbackId,
-//           userId: address,
-//         });
-//         // 2) let the parent know we’ve paid
-//         onPaid(address);
-//       }
-//     },
-//     [address, stream?.playbackId, onPaid],
-//   );
+  const handlePay = async () => {
+    if (!connected) {
+      toast.error('Please connect your wallet first');
+      return;
+    }
 
-  // If they’re not logged into Privy yet, prompt them first.
-  // if (ready && !authenticated) {
-  //   return (
-  //     <button onClick={() => login()} className="w-full py-3 rounded bg-main-blue text-white">
-  //       Login to Subscribe (${stream?.amount.toFixed(2)})
-  //     </button>
-  //   );
-  // }
+    if (!walletReady) {
+      toast.error('Wallet not ready. Please wait a moment.');
+      return;
+    }
 
-  // // Next, if they have no wallet, show the ConnectWallet UI
-  // if (!address) {
-  //   return (
-  //     <div className=" flex items-center justify-center h-full space-y-3 flex-col ">
-  //       <h2 className="text-xl">🔒</h2>
-  //       <p className="text-base text-center font-medium">{`A one-time fee of $${stream?.amount.toFixed(2) || '$$'} unlocks access to ${stream?.assetName || stream?.title || ''}.`}</p>
+    if (!solAmount) {
+      toast.error('Unable to calculate SOL amount. Please try again.');
+      return;
+    }
 
-  //       {/* <Wallet>
-      //   <ConnectWallet>
-      //     <button className="w-full py-3 rounded bg-main-blue text-white">Connect Wallet</button>
-      //   </ConnectWallet>
-      // </Wallet> */}
-      // </div>
-    // );
-  // }
+    try {
+      await processPayment(solAmount, recipientAddress);
+      onPaymentSuccess();
+      toast.success('Payment successful! Access granted.');
+    } catch (err: any) {
+      toast.error(err.message || 'Payment failed');
+    }
+  };
 
-  // return (
-  //   <div></div>
-    // <Transaction
-    //   chainId={1} // Ethereum Mainnet
-    //   calls={calls}
-    //   onStatus={handleOnStatus}
-    // >
-    //   <TransactionButton
-    //     className="w-full py-3 rounded bg-main-blue text-white"
-    //     text={`Pay ${stream.amount.toFixed(2)}`}
-    //   />
-    //   {/* Pay ${stream.amount.toFixed(2)} */}
-    //   {/* </TransactionButton> */}
-    //   <TransactionSponsor />
-    //   <TransactionStatus>
-    //     <TransactionStatusLabel />
-    //     <TransactionStatusAction />
-    //   </TransactionStatus>
-    // </Transaction>
-//   );
-// }
+  return (
+    <div className="flex flex-col items-center justify-center p-6 space-y-4">
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Payment Required</h2>
+      <p className="text-gray-600 dark:text-gray-400">This stream requires payment to access.</p>
+
+      {/* Price Display */}
+      <div className="w-full max-w-md space-y-3 bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+        <div className="flex justify-between items-center">
+          <span className="text-gray-600 dark:text-gray-400">Price:</span>
+          <span className="text-lg font-semibold text-gray-900 dark:text-white">
+            ${formatNumber(usdAmount, 2)}
+          </span>
+        </div>
+        
+        {solAmount && (
+          <div className="flex justify-between items-center">
+            <span className="text-gray-600 dark:text-gray-400">Amount in SOL:</span>
+            <span className="text-lg font-semibold text-gray-900 dark:text-white">
+              {formatNumber(solAmount, 4)} SOL
+            </span>
+          </div>
+        )}
+
+        {solPrice && (
+          <div className="flex justify-between items-center text-sm">
+            <span className="text-gray-500 dark:text-gray-500">SOL/USD Rate:</span>
+            <span className="text-gray-700 dark:text-gray-300">
+              ${formatNumber(solPrice, 2)}
+            </span>
+          </div>
+        )}
+
+        {priceLoading && (
+          <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+            Loading exchange rate...
+          </p>
+        )}
+      </div>
+
+      {!connected ? (
+        <div className="flex flex-col items-center space-y-4">
+          <p className="text-sm text-gray-500 dark:text-gray-400">Connect your wallet to proceed</p>
+          <WalletMultiButton />
+        </div>
+      ) : (
+        <div className="flex flex-col items-center space-y-4 w-full max-w-md">
+          <button
+            onClick={handlePay}
+            disabled={processingPayment || !walletReady || !solAmount || priceLoading}
+            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+          >
+            {processingPayment ? 'Processing Payment...' : 'Pay & Access Stream'}
+          </button>
+          {!walletReady && (
+            <p className="text-sm text-yellow-600">Initializing wallet...</p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}

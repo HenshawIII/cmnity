@@ -76,3 +76,25 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Ensure wallet adapter modal appears above Radix UI dialogs */
+.wallet-adapter-modal-wrapper,
+[data-rk="modal-overlay"],
+.wallet-adapter-modal,
+[data-radix-popper-content-wrapper],
+.wallet-adapter-dropdown-list {
+  z-index: 9999 !important;
+}
+
+.wallet-adapter-modal-overlay,
+[data-rk="modal-overlay"] {
+  z-index: 9998 !important;
+}
+
+/* Ensure wallet options are clickable */
+.wallet-adapter-dropdown-list-item,
+.wallet-adapter-button-list button,
+.wallet-adapter-button-trigger {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}

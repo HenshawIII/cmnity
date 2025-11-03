@@ -3,6 +3,7 @@ import streamReducer from '../features/streamSlice';
 import assetsReducer from '../features/assetsSlice';
 import userReducer from '../features/userSlice';
 import chatReducer from '../features/chatSlice';
+import profileReducer from '../features/profileSlice';
 
 const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ const store = configureStore({
     assets: assetsReducer,
     user: userReducer,
     chat: chatReducer,
+    profile: profileReducer,
   },
 });
 

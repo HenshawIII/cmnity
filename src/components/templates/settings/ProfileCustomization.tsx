@@ -3,33 +3,18 @@ import React, { useState, useEffect ,useMemo} from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import { toast } from 'sonner';
 import { Bars } from 'react-loader-spinner';
-import axios from 'axios';
 import InputField from '@/components/ui/InputField';
 import { Copy, ExternalLink } from 'lucide-react';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
-
-interface ProfileData {
-  displayName: string;
-  bio: string;
-  avatar: string;
-  socialLinks: {
-    twitter?: string;
-    instagram?: string;
-    youtube?: string;
-    website?: string;
-  };
-  theme: {
-    backgroundColor: string;
-    textColor: string;
-    accentColor: string;
-  };
-  isPublic: boolean;
-}
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState, AppDispatch } from '@/store/store';
+import { fetchProfile, updateProfile, createProfile, ProfileData } from '@/features/profileAPI';
 
 export function ProfileCustomization() {
   const { user } = usePrivy();
+  const dispatch = useDispatch<AppDispatch>();
   const solanaWalletAddress = useSelector((state: RootState) => state.user.solanaWalletAddress);
+  const { profile: reduxProfile, loading: reduxLoading } = useSelector((state: RootState) => state.profile);
+  
   const [profileData, setProfileData] = useState<ProfileData>({
     displayName: '',
     bio: '',
@@ -42,7 +27,6 @@ export function ProfileCustomization() {
     },
     isPublic: false,
   });
-  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [profileUrl, setProfileUrl] = useState('');
   const [errors, setErrors] = useState<{
@@ -51,31 +35,44 @@ export function ProfileCustomization() {
   }>({});
   const [isExistingProfile, setIsExistingProfile] = useState(false);
 
-  // Fetch existing profile data
-
   const creatorAddress = useMemo(() => user?.wallet?.chainType === 'solana' ? user.wallet.address : solanaWalletAddress, [user?.wallet?.address, solanaWalletAddress]);
+  
+  const lastFetchedAddress = useSelector((state: RootState) => state.profile.lastFetchedAddress);
+  
+  // Fetch profile from Redux or fetch if not loaded
   useEffect(() => {
-    const fetchProfile = async () => {
-      if (!creatorAddress) return;
-      
-      try {
-        setLoading(true);
-        const response = await axios.get(`https://chaintv.onrender.com/api/creators/${creatorAddress}/profile`);
-        console.log('response', response);
-        if (response.data) {
-          setProfileData(response.data.profile);
-          setIsExistingProfile(true);
-        }
-      } catch (error) {
-        console.log('No existing profile found');
-        setIsExistingProfile(false);
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (!creatorAddress) return;
+    
+    // Fetch if not already fetched for this address
+    if (lastFetchedAddress !== creatorAddress) {
+      dispatch(fetchProfile(creatorAddress));
+    }
+  }, [creatorAddress, lastFetchedAddress, dispatch]);
 
-    fetchProfile();
-  }, [creatorAddress]);
+  // Sync Redux profile to local state when it changes
+  useEffect(() => {
+    if (reduxProfile) {
+      setProfileData(reduxProfile);
+      setIsExistingProfile(true);
+    } else {
+      // Reset to default if no profile
+      setProfileData({
+        displayName: '',
+        bio: '',
+        avatar: '',
+        socialLinks: {},
+        theme: {
+          backgroundColor: '#ffffff',
+          textColor: '#000000',
+          accentColor: '#3351ff',
+        },
+        isPublic: false,
+      });
+      setIsExistingProfile(false);
+    }
+  }, [reduxProfile]);
+
+  const loading = reduxLoading;
 
   // Generate profile URL
   useEffect(() => {
@@ -162,25 +159,18 @@ export function ProfileCustomization() {
 
     try {
       setSaving(true);
-      const endpoint = `https://chaintv.onrender.com/api/creators/${creatorAddress}/profile`;
-      const method = isExistingProfile ? 'put' : 'post';
       
-      await axios({
-        method,
-        url: endpoint,
-        data: {
-          ...profileData,
-          creatorId: creatorAddress
-        }
-      });
-
-      if (!isExistingProfile) {
+      // Use Redux actions instead of direct axios calls
+      if (isExistingProfile) {
+        await dispatch(updateProfile({ creatorAddress, profileData })).unwrap();
+        toast.success('Profile updated successfully!');
+      } else {
+        await dispatch(createProfile({ creatorAddress, profileData })).unwrap();
         setIsExistingProfile(true);
+        toast.success('Profile saved successfully!');
       }
-      
-      toast.success(`Profile ${isExistingProfile ? 'updated' : 'saved'} successfully!`);
     } catch (error: any) {
-      toast.error(error.response?.data?.message || `Failed to ${isExistingProfile ? 'update' : 'save'} profile`);
+      toast.error(error || `Failed to ${isExistingProfile ? 'update' : 'save'} profile`);
     } finally {
       setSaving(false);
     }

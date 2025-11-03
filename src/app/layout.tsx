@@ -32,8 +32,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <title>Switch TV</title>
-        <meta name="description" content="Switch TV" />
+        <title>x402tv</title>
+        <meta name="description" content="x402 powered livestreaming on Solana" />
         <link rel="icon" href="/assets/images/favicon.ico" />
       </head>
       <body className={` antialiased`}>
@@ -43,10 +43,9 @@ export default function RootLayout({
       config={{
         appearance: {
           landingHeader: '',
-          loginMessage: 'Welcome to Chainfren TV',
+          loginMessage: 'Welcome to x402tv',
           theme: 'light',
           accentColor: '#3351FF',
-          showWalletLoginFirst: false,
           logo: 'https://res.cloudinary.com/dbkthd6ck/image/upload/v1737309623/chainfren_logo_eey39b.png',
           // showWalletLoginFirst: false,
           walletChainType:'solana-only',
@@ -54,7 +53,7 @@ export default function RootLayout({
         
         },
         externalWallets: {solana: {connectors: toSolanaWalletConnectors()}},
-        loginMethods:['wallet','email','google','farcaster'],
+        loginMethods:['wallet','email'],
       }}
     >
        

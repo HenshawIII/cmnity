@@ -54,8 +54,8 @@ import { CustomizeChannelDialog } from './Dialog';
 import axios from 'axios';
 
 const listItemClassNames = {
-  option: 'flex items-center text-lg px-5 py-2 hover:bg-gray-100 cursor-pointer',
-  icon: 'text-black-primary-text text-xl font-bold',
+  option: 'flex items-center text-lg px-5 py-2 hover:bg-white/10 cursor-pointer text-white',
+  icon: 'text-white text-xl font-bold',
 };
 
 export const Popup = ({ playbackId, streamId }: PopupProps) => {
@@ -106,7 +106,7 @@ export const Popup = ({ playbackId, streamId }: PopupProps) => {
     setIsLoading(true);
     try {
       // First, make a request to the `/deletestream` endpoint with the playbackId
-      const response = await axios.delete(`https://chaintv.onrender.com/api/streams/deletestream?${playbackId}`);
+      const response = await axios.delete(`https://chaintv.onrender.com/api/streams/deletestream?playbackId=${playbackId}`);
       if (response.status !== 200) {
         throw new Error(response.data.error || 'Failed to delete stream from external system');
       }
@@ -126,28 +126,35 @@ export const Popup = ({ playbackId, streamId }: PopupProps) => {
     <>
       <DropdownMenu.Root>
         <DropdownMenu.Trigger asChild>
-          <button className="p-2">
-            <BsThreeDotsVertical className="text-lg cursor-pointer text-black-primary-text focus:bg-main-blue focus:ring-2 focus:ring-offset-2" />
+          <button className="p-2 hover:bg-white/10 rounded transition-colors relative z-10">
+            <BsThreeDotsVertical className="text-lg cursor-pointer text-white focus:bg-purple-500 focus:ring-2 focus:ring-offset-2" />
           </button>
         </DropdownMenu.Trigger>
-        <DropdownMenu.Content className="min-w-[200px] min-h-[200px] z-50 bg-white rounded shadow-md p-2 ">
+        <DropdownMenu.Portal>
+          <DropdownMenu.Content 
+            className="min-w-[200px] min-h-[200px] bg-gray-900/95 backdrop-blur-sm border border-white/20 rounded shadow-md p-2 z-[9999]"
+            sideOffset={5}
+            align="end"
+            side="bottom"
+          >
           <DropdownMenu.Item onSelect={handleEditDetails} className={`${listItemClassNames.option}  `}>
             <HiLink className={`${listItemClassNames.icon} text-main-blue`} />
-            <p className="ml-2 text-sm text-black font-medium">Edit Livestream/Channel</p>
+            <p className="ml-2 text-sm text-white hover:text-main-blue font-medium">Edit Livestream/Channel</p>
           </DropdownMenu.Item>
           <DropdownMenu.Item onSelect={handleCopyStreamLink} className={listItemClassNames.option}>
             <AiOutlineEdit className={`${listItemClassNames.icon} text-green-500`} />
-            <p className="ml-2 text-sm font-medium text-black">Copy Stream Link</p>
+            <p className="ml-2 text-sm font-medium text-white hover:text-green-500">Copy Stream Link</p>
           </DropdownMenu.Item>
           <DropdownMenu.Item onSelect={handleScheduleStream} className={listItemClassNames.option}>
             <PiCalendarCheckBold className={`${listItemClassNames.icon} text-blue-500`} />
-            <p className="ml-2 text-sm font-medium text-black">Schedule stream</p>
+            <p className="ml-2 text-sm font-medium text-white hover:text-blue-500">Schedule stream</p>
           </DropdownMenu.Item>
           <DropdownMenu.Item onSelect={handleDeleteChannel} className={listItemClassNames.option}>
             <RiDeleteBin6Line className={`${listItemClassNames.icon} text-red-700`} />
-            <p className="ml-2 text-sm font-medium text-black">Delete channel</p>
+            <p className="ml-2 text-sm font-medium text-white hover:text-red-700">Delete channel</p>
           </DropdownMenu.Item>
-        </DropdownMenu.Content>
+          </DropdownMenu.Content>
+        </DropdownMenu.Portal>
       </DropdownMenu.Root>
       <AlertDialogs
         open={alertOpen}
@@ -159,7 +166,7 @@ export const Popup = ({ playbackId, streamId }: PopupProps) => {
         onConfirm={confirmDelete}
         loading={isLoading}
       />
-      {isDialogOpen && <UpdateLivestream open={isDialogOpen} onClose={() => setIsDialogOpen(false)} id={streamId} />}
+        {isDialogOpen && <UpdateLivestream open={isDialogOpen} onClose={() => setIsDialogOpen(false)} id={streamId} />}
     </>
   );
 };

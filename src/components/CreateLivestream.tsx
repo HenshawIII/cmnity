@@ -51,7 +51,15 @@ export function CreateLivestream({ close }: { close: () => void }) {
     const { name, value } = e.target;
     let parsed: string | boolean | number = value;
     if (name === 'record') parsed = value === 'yes';
-    if (name === 'amount') parsed = parseFloat(value) || 0;
+    if (name === 'amount') {
+      // Allow decimal and integer values, including partial input like "0."
+      if (value === '' || value === '.') {
+        parsed = 0;
+      } else {
+        const numValue = parseFloat(value);
+        parsed = isNaN(numValue) ? 0 : numValue;
+      }
+    }
     setFormData((prev) => ({ ...prev, [name]: parsed }));
     if (errors[name]) {
       setErrors((prev) => {
@@ -97,7 +105,7 @@ export function CreateLivestream({ close }: { close: () => void }) {
     const newErrors: Record<string, string> = {};
     if (!formData.streamName) newErrors.streamName = 'Required';
     if (!formData.creatorId) newErrors.creatorId = 'Required';
-    if (formData.viewMode !== 'free' && (!formData.amount || formData.amount <= 0)) {
+    if (formData.viewMode !== 'free' && (formData.amount === undefined || formData.amount <= 0 || isNaN(formData.amount))) {
       newErrors.amount = 'Invalid amount';
     }
     const word = formData.channelDescription.trim();
@@ -223,16 +231,16 @@ export function CreateLivestream({ close }: { close: () => void }) {
         {/* Amount */}
         {formData.viewMode !== 'free' && (
           <div className="flex flex-col">
-            <label className="text-sm pb-1 text-white font-medium">Amount($)</label>
+            <label className="text-sm pb-1 text-white font-medium">Amount (SOL)</label>
             <InputField
               label="Amount"
               name="amount"
               type="number"
-              value={String(formData.amount)}
+              step="any"
+              min="0"
+              value={formData.amount === 0 ? '' : formData.amount}
               onChange={handleChange}
               placeholder="0.00"
-              min="0.01"
-              step="0.01"
               className={clsx('border p-2 rounded', { 'border-red-500': errors.amount })}
             />
             {errors.amount && <p className="text-red-500 text-xs">{errors.amount}</p>}

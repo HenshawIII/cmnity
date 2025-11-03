@@ -8,7 +8,7 @@ import Link from 'next/link';
 function HeroHeader() {
   return (
     <header className="w-full flex items-center justify-between py-6 px-4 md:px-8">
-      <span className="text-2xl font-bold text-white tracking-tight">SwitchTV</span>
+      <span className="text-2xl font-bold text-white tracking-tight">x402tv</span>
       <Link href="/dashboard">
         <button className="bg-[#3B82F6] hover:bg-[#3c92F6] text-white font-semibold px-6 py-2 rounded-md transition-colors">
           Get Started
@@ -67,7 +67,7 @@ export default function Hero() {
           {/* Subtitle */}
           <p className="text-xl sm:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">
             Create, stream, and monetize your content with blockchain-powered tools. 
-            Join the next generation of content creators on SwitchTV.
+            Join the next generation of content creators on x402tv.
           </p>
 
           {/* Feature Highlights */}

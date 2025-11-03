@@ -213,7 +213,7 @@
 'use client';
 import * as Dialog from '@radix-ui/react-dialog';
 import axios from 'axios';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { toast } from 'sonner';
 import { RotatingLines } from 'react-loader-spinner';
@@ -236,16 +236,23 @@ interface CustomizeChannelDialogProps {
     description: string;
     logo: string;
   }) => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function CustomizeChannelDialog({ playbackId, initialValues, onSave }: CustomizeChannelDialogProps) {
+export function CustomizeChannelDialog({ playbackId, initialValues, onSave, open, onOpenChange }: CustomizeChannelDialogProps) {
   const [settings, setSettings] = useState(initialValues);
   const [saving, setSaving] = useState(false);
+  const prevOpenRef = useRef(open);
 
-  // Sync if parent initialValues ever change
+  // Only sync settings when dialog opens (not when initialValues changes while closed)
   useEffect(() => {
-    setSettings(initialValues);
-  }, [initialValues]);
+    // If dialog just opened (was closed, now open), sync settings
+    if (open && !prevOpenRef.current) {
+      setSettings(initialValues);
+    }
+    prevOpenRef.current = open;
+  }, [open, initialValues]);
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.[0]) return;
@@ -263,16 +270,16 @@ export function CustomizeChannelDialog({ playbackId, initialValues, onSave }: Cu
   const handleSave = async () => {
     setSaving(true);
     try {
-      await axios.put(`https://chaintv.onrender.com/api/update/streams/?playbackid=${playbackId}`, {
+      await axios.put(`https://chaintv.onrender.com/api/streams/updatestream/?playbackid=${playbackId}`, {
         bgcolor: settings.bgColor,
         color: settings.textColor,
-        fontSize: settings.fontSize,
+        fontSize: parseInt(settings.fontSize),
         title: settings.title,
         description: settings.description,
-        logo: settings.logo,
+        logo: settings.logo || '',
       });
       toast.success('Channel updated successfully!');
-      onSave(settings);
+      onSave({ ...settings, fontSize: parseInt(settings.fontSize).toString() });
     } catch (err: any) {
       console.error(err);
       toast.error(err.message || 'Failed to update channel');
@@ -285,7 +292,7 @@ export function CustomizeChannelDialog({ playbackId, initialValues, onSave }: Cu
   const presetTextColors = ['#000000', 'red', 'green', 'blue', 'purple', 'gray'];
 
   return (
-    <Dialog.Root>
+    <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Trigger asChild>
         <button className="rounded-md bg-background-gray px-4 py-2 hover:bg-gray-200">Customize Channel</button>
       </Dialog.Trigger>

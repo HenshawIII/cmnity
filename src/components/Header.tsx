@@ -7,7 +7,8 @@ import { MdOutlineLogout } from 'react-icons/md';
 import { useRouter } from 'next/navigation';
 import * as Dialog from '@radix-ui/react-dialog';
 import { useLogout, usePrivy } from '@privy-io/react-auth';
-import { useSolanaWallets } from '@privy-io/react-auth/solana';
+import { useWallets } from '@privy-io/react-auth/solana';
+import {useCreateWallet} from '@privy-io/react-auth/solana';
 import { useEffect, useState } from 'react';
 import { FaRegUserCircle, FaWallet, FaGoogle, FaDiscord, FaTwitter } from 'react-icons/fa';
 import { MdEmail } from 'react-icons/md';
@@ -22,7 +23,8 @@ import { setSolanaWalletAddress } from '@/features/userSlice';
 const Header = ({ toggleMenu, mobileOpen }: { toggleMenu: () => void; mobileOpen: boolean }) => {
   const navigate = useRouter();
   const { user, ready } = usePrivy();
-  const { wallets: solana, createWallet } = useSolanaWallets();
+  const { wallets: solana } = useWallets();
+  const { createWallet } = useCreateWallet();
   const [solanaWallet, setSolanaWallet] = useState<string>('');
   const [showDialog, setShowDialog] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -32,7 +34,7 @@ const Header = ({ toggleMenu, mobileOpen }: { toggleMenu: () => void; mobileOpen
   useEffect(() => {
     if (!ready || !user) return;
     async function setUp() {
-      let solanaWalletObj: { address: string } | undefined = solana.find((wallet) => wallet.walletClientType === 'privy');
+      let solanaWalletObj: any = solana.find((wallet: any) => wallet.walletClientType === 'privy' || wallet.clientType === 'privy');
       if (!solanaWalletObj) {
         try {
           setLoading(true);
@@ -45,8 +47,11 @@ const Header = ({ toggleMenu, mobileOpen }: { toggleMenu: () => void; mobileOpen
         }
       }
       if (solanaWalletObj) {
-        setSolanaWallet(solanaWalletObj.address);
-        dispatch(setSolanaWalletAddress(solanaWalletObj.address));
+        const address = solanaWalletObj?.address ?? solanaWalletObj?.wallet?.address;
+        if (address) {
+          setSolanaWallet(address);
+          dispatch(setSolanaWalletAddress(address));
+        }
       }
     }
     setUp();
@@ -70,10 +75,10 @@ const Header = ({ toggleMenu, mobileOpen }: { toggleMenu: () => void; mobileOpen
             <button onClick={toggleMenu} className="md:hidden">
               {mobileOpen ? <X className="h-7 w-7 text-white" /> : <Menu className="h-7 w-7 text-white" />}
             </button>
-            <div className="  px-3 py-1.5 rounded-md ">
+            <div className=" rounded-md ">
               {/* <Image src={Chainfren_Logo} alt={'header_Logo'} />
                */}
-               <h1 className="text-2xl font-bold text-white">Switch TV</h1>
+               <h1 className="text-md sm:text-lg  font-bold text-white">x402 powered livestreaming on Solana</h1>
             </div>
           </div>
           {/* Avatar */}
@@ -81,16 +86,13 @@ const Header = ({ toggleMenu, mobileOpen }: { toggleMenu: () => void; mobileOpen
           <div className="flex items-center flex-1 justify-end gap-4">
             <DropdownMenu.Root>
               <DropdownMenu.Trigger asChild>
-                <div className="flex items-center gap-2">
+                <button className="flex items-center justify-center p-2 hover:bg-white/10 rounded-full transition-colors">
                   {ready && (user?.wallet?.chainType === 'solana' || solanaWallet) ? (
-                    <span className="text-purple-400 font-semibold">
-                      {(user?.wallet?.chainType === 'solana' ? user.wallet.address : solanaWallet).slice(0, 6)}...
-                      {(user?.wallet?.chainType === 'solana' ? user.wallet.address : solanaWallet).slice(-4)}
-                    </span>
+                    <FaRegUserCircle className="text-2xl text-purple-400" />
                   ) : (
-                    <p className="text-gray-300">{ready && 'No wallet connected'}</p>
+                    <FaRegUserCircle className="text-2xl text-gray-400" />
                   )}
-                </div>
+                </button>
               </DropdownMenu.Trigger>
               <DropdownMenu.Portal>
                 <DropdownMenu.Content

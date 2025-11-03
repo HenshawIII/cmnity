@@ -20,6 +20,7 @@ export interface ChannelCardProps {
   playbackId?: string;
   host?: string;
   image: StaticImageData;
+  logo: string;
   playb: string;
   lastSeen: Date;
   status: boolean;
