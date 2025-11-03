@@ -1,0 +1,8 @@
+export default function TestinPage() {
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <h1 className="text-2xl font-bold">Test Page</h1>
+    </div>
+  );
+}
+
