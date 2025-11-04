@@ -197,7 +197,7 @@ export function ProfileCustomization() {
     );
   }
 
-  const hasRequiredFields = profileData.displayName.trim() && profileData.bio.trim();
+  const hasRequiredFields = profileData?.displayName?.trim() && profileData?.bio?.trim();
 
   return (
     <div className="space-y-6">
@@ -245,7 +245,7 @@ export function ProfileCustomization() {
           </label>
           <InputField
             type="text"
-            value={profileData.displayName}
+            value={profileData?.displayName}
             onChange={(e) => handleInputChange('displayName', e.target.value)}
             placeholder="Enter your display name"
             className={`w-full bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder-gray-400 ${errors.displayName ? 'border-red-400' : ''}`}
@@ -260,14 +260,14 @@ export function ProfileCustomization() {
             Bio <span className="text-red-400">*</span>
           </label>
           <textarea
-            value={profileData.bio}
+            value={profileData?.bio}
             onChange={(e) => handleInputChange('bio', e.target.value)}
             placeholder="Tell viewers about yourself..."
             className={`w-full p-3 border border-white/20 bg-white/10 backdrop-blur-sm rounded-lg resize-none h-24 text-white placeholder-gray-400 ${errors.bio ? 'border-red-400' : ''}`}
             maxLength={500}
           />
           <div className="flex justify-between items-center mt-1">
-            <p className="text-xs text-gray-300">{profileData.bio.length}/500 characters</p>
+            <p className="text-xs text-gray-300">{profileData?.bio?.length}/500 characters</p>
             {errors.bio && (
               <p className="text-red-400 text-xs">{errors.bio}</p>
             )}
@@ -277,9 +277,9 @@ export function ProfileCustomization() {
         <div>
           <label className="block text-sm font-medium mb-1 text-white">Profile Picture</label>
           <div className="flex items-center space-x-4">
-            {profileData.avatar && (
+            {profileData?.avatar && (
               <img
-                src={profileData.avatar}
+                src={profileData?.avatar}
                 alt="Profile"
                 className="w-16 h-16 rounded-full object-cover"
               />
@@ -303,7 +303,7 @@ export function ProfileCustomization() {
             <label className="block text-sm font-medium mb-1 text-white">Twitter </label>
             <InputField
               type="url"
-              value={profileData.socialLinks?.twitter || ''}
+              value={profileData?.socialLinks?.twitter || ''}
               onChange={(e) => handleSocialLinkChange('twitter', e.target.value)}
               placeholder="https://twitter.com/username"
               className="w-full bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder-gray-400"
@@ -314,7 +314,7 @@ export function ProfileCustomization() {
             <label className="block text-sm font-medium mb-1 text-white">Instagram </label>
             <InputField
               type="url"
-              value={profileData.socialLinks?.instagram || ''}
+              value={profileData?.socialLinks?.instagram || ''}
               onChange={(e) => handleSocialLinkChange('instagram', e.target.value)}
               placeholder="https://instagram.com/username"
               className="w-full bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder-gray-400"
@@ -325,7 +325,7 @@ export function ProfileCustomization() {
             <label className="block text-sm font-medium mb-1 text-white">YouTube </label>
             <InputField
               type="url"
-              value={profileData.socialLinks?.youtube || ''}
+              value={profileData?.socialLinks?.youtube || ''}
               onChange={(e) => handleSocialLinkChange('youtube', e.target.value)}
               placeholder="https://youtube.com/@channel"
               className="w-full bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder-gray-400"
@@ -336,7 +336,7 @@ export function ProfileCustomization() {
             <label className="block text-sm font-medium mb-1 text-white">Website</label>
             <InputField
               type="url"
-              value={profileData.socialLinks?.website || ''}
+              value={profileData?.socialLinks?.website || ''}
               onChange={(e) => handleSocialLinkChange('website', e.target.value)}
               placeholder="https://yourwebsite.com"
               className="w-full bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder-gray-400"

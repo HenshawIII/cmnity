@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
-import { PublicKey, SystemProgram, Transaction, LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
 import backendApi from '@/utils/backendApi';
 
 export interface Stream {
@@ -9,7 +9,7 @@ export interface Stream {
   creatorId: string;
   viewMode: 'free' | 'one-time' | 'monthly';
   amount: number;
-  Users?: any[];
+  Users?: Array<{ payingUser: string }>;
   description: string;
   streamName: string;
   logo: string;
@@ -47,11 +47,24 @@ export function useStreamGate(playbackId: string) {
       .finally(() => setLoading(false));
   }, [playbackId]);
 
-  // 2️⃣ Process payment when wallet is connected and stream is paid
+  // 2️⃣ Check if viewer's wallet address is in the Users array
+  useEffect(() => {
+    if (!stream || !publicKey || stream.viewMode === 'free') return;
+
+    const walletAddress = publicKey.toBase58();
+    const hasPaid = stream.Users?.some((user) => 
+      user.payingUser?.toLowerCase() === walletAddress.toLowerCase()
+    );
+
+    if (hasPaid) {
+      setHasAccess(true);
+    }
+  }, [stream, publicKey]);
+
+  // 3️⃣ Process payment when wallet is connected and stream is paid
   const processPayment = async (solAmount: number, recipientAddress: string) => {
     if (!stream || stream.viewMode === 'free' || hasAccess) return;
     if (!connected || !publicKey || !sendTransaction) {
-      console.log('processPayment: Missing requirements', { connected, hasPublicKey: !!publicKey, hasSendTransaction: !!sendTransaction });
       throw new Error('Wallet not connected or transaction not supported');
     }
 
@@ -65,23 +78,18 @@ export function useStreamGate(playbackId: string) {
 
     setProcessingPayment(true);
     try {
-      console.log('processPayment: Processing payment', { 
-        playbackId, 
-        walletAddress: publicKey.toBase58(),
-        solAmount,
-        recipientAddress 
-      });
+      console.log('Trying to send transaction', { solAmount, recipientAddress, playbackId });
 
-      // Create transaction
-      const transaction = new Transaction();
+      // Convert SOL to lamports, ensuring it's an integer
+      // Use Math.floor to avoid decimal values that cause BigInt conversion errors
+      const lamports = Math.floor(solAmount * 1e9);
       
-      // Add payment instruction
-      const lamports = solAmount * LAMPORTS_PER_SOL;
       if (lamports <= 0) {
         throw new Error('Payment amount must be greater than 0');
       }
-      
-      transaction.add(
+
+      // Create and send transaction (simplified like Player.tsx)
+      const transaction = new Transaction().add(
         SystemProgram.transfer({
           fromPubkey: publicKey,
           toPubkey: recipientPubkey,
@@ -89,42 +97,20 @@ export function useStreamGate(playbackId: string) {
         })
       );
 
-      // Get recent blockhash
-      const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
-      transaction.recentBlockhash = blockhash;
-      transaction.feePayer = publicKey;
-
-      // Send transaction
       const signature = await sendTransaction(transaction, connection);
-      console.log('Transaction sent:', signature);
+      console.log('Transaction sent successfully, signature:', signature);
 
-      // Wait for confirmation
-      const confirmation = await connection.confirmTransaction({
-        signature,
-        blockhash,
-        lastValidBlockHeight,
-      }, 'confirmed');
-
-      if (confirmation.value.err) {
-        throw new Error('Transaction failed');
-      }
-
-      console.log('Transaction confirmed:', signature);
-
-      // Send payment info to backend
-      try {
-        await backendApi.post('/streams/payment', {
-          playbackId,
-          walletAddress: publicKey.toBase58(),
-          transactionSignature: signature,
-          solAmount,
-          usdAmount: stream.amount,
-        });
-        console.log('Payment info sent to backend');
-      } catch (backendError: any) {
+      // Send payment info to backend (non-blocking)
+      await axios.post('http://localhost:5300/api/streams/addpayinguser', {
+        playbackId,
+        walletAddress: publicKey.toBase58(),
+        transactionSignature: signature,
+        solAmount,
+        usdAmount: stream.amount,
+      }).catch((backendError: any) => {
         console.error('Failed to send payment info to backend:', backendError);
         // Don't fail the payment if backend call fails
-      }
+      });
 
       // Grant access
       setHasAccess(true);
@@ -133,15 +119,15 @@ export function useStreamGate(playbackId: string) {
       return { success: true, signature };
     } catch (err: any) {
       console.error('Payment processing failed:', err);
-      throw new Error(err.message || 'Payment failed');
+      throw new Error(err?.message || 'Payment failed');
     } finally {
       setProcessingPayment(false);
     }
   };
 
-  // 3️⃣ If the user list already contains them, grant access (you'll call markPaid later)
+  // 4️⃣ Helper function to check if user has paid (for after payment confirmation)
   const markPaid = (userAddress: string) => {
-    if (stream?.Users?.some((u) => u.userId === userAddress)) {
+    if (stream?.Users?.some((u) => u.payingUser?.toLowerCase() === userAddress.toLowerCase())) {
       setHasAccess(true);
     }
   };

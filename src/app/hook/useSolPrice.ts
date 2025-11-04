@@ -17,7 +17,12 @@ export function useSolPrice() {
         setLoading(true);
         // Using CoinGecko API for SOL/USD price
         const response = await fetch(
-          'https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd'
+          'https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd',{
+            method: 'GET',
+            headers: {
+              'x-cg-demo-api-key': 'CG-1AQTF8wfihsDxc9kqH6B8qCb',
+            },
+          }
         );
         
         if (!response.ok) {
@@ -58,4 +63,5 @@ export function useSolPrice() {
     usdToSol,
   };
 }
+
 

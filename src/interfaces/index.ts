@@ -38,6 +38,7 @@ export interface VideoCardProps {
 export interface Stream {
   id: string;
   name: string;
+  title: string;
   playbackId: string;
   streamKey: string;
   createdAt?: Date;

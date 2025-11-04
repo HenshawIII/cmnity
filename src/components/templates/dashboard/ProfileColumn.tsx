@@ -99,7 +99,7 @@ export function ProfileColumn() {
         </>
       ) : (
         /* No Profile State */
-        <div className="text-center space-y-4">
+        <div className="text-center flex flex-col space-y-4">
           <div className="w-24 h-24 rounded-full bg-white/10 flex items-center justify-center mx-auto border-2 border-dashed border-white/30">
             <User className="w-12 h-12 text-white/40" />
           </div>
@@ -125,7 +125,7 @@ export function ProfileColumn() {
           )}
           <Link
             href='/dashboard/settings'
-            className="w-full py-2 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm font-medium"
+            className="w-[50%] mx-auto py-2 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm  font-medium"
           >
             Set Up Profile
           </Link>

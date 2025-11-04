@@ -124,6 +124,7 @@ export function CreateLivestream({ close }: { close: () => void }) {
     try {
       const payload = {
         streamName: formData.streamName,
+        title: formData.streamName,
         record: formData.record,
         creatorId: formData.creatorId,
         viewMode: formData.viewMode,

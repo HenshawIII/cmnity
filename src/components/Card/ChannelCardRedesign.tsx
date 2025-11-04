@@ -32,6 +32,8 @@ export const ChannelCardRedesign: React.FC<ChannelCardRedesignProps> = ({
   const socialLinks = profile?.socialLinks || {};
   const hasSocialLinks = Object.values(socialLinks).some((link) => link && link.trim() !== '');
 
+  // console.log(title,logo,status);
+
   return (
     <>
     <div className="w-full max-w-none flex bg-transparent  items-center space-y-4 justify-between p-4 rounded-lg">
@@ -50,17 +52,19 @@ export const ChannelCardRedesign: React.FC<ChannelCardRedesignProps> = ({
             sizes="128px"
           />
         )}
+        
+      </div>
+
+      {/* Bold Stream Name */}
+      <div className="text-center flex">
+        <h2 className="text-white font-bold text-2xl">{title}</h2>
+        <h2 className="text-purple-300 text-sm ">TV</h2>
         {/* Live Status Badge */}
         {status && (
           <div className="absolute bottom-0 right-0 bg-green-500 text-white text-xs px-2 py-1 rounded-tl-lg rounded-br-lg font-semibold">
             LIVE
           </div>
         )}
-      </div>
-
-      {/* Bold Stream Name */}
-      <div className="text-center">
-        <h2 className="text-white font-bold text-2xl">{title}</h2>
         {/* {viewstream?.viewCount !== undefined && (
           <p className="text-gray-300 text-sm mt-1">{viewstream.viewCount} views</p>
         )}

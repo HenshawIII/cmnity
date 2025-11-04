@@ -42,8 +42,8 @@ export const updateProfile = createAsyncThunk(
   async ({ creatorAddress, profileData }: { creatorAddress: string; profileData: ProfileData }, { rejectWithValue }) => {
     try {
       const response = await axios.put(
-        `https://chaintv.onrender.com/api/creators/${creatorAddress}/profile`,
-        { profile: profileData }
+        `http://localhost:5300/api/creators/${creatorAddress}/profile`,
+        { ...profileData }
       );
       return response.data?.profile || profileData;
     } catch (error: any) {
@@ -59,7 +59,7 @@ export const createProfile = createAsyncThunk(
     try {
       const response = await axios.post(
         `https://chaintv.onrender.com/api/creators/${creatorAddress}/profile`,
-        { profile: profileData }
+        { ...profileData }
       );
       return response.data?.profile || profileData;
     } catch (error: any) {

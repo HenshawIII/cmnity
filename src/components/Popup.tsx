@@ -132,23 +132,23 @@ export const Popup = ({ playbackId, streamId }: PopupProps) => {
         </DropdownMenu.Trigger>
         <DropdownMenu.Portal>
           <DropdownMenu.Content 
-            className="min-w-[200px] min-h-[200px] bg-gray-900/95 backdrop-blur-sm border border-white/20 rounded shadow-md p-2 z-[9999]"
+            className="min-w-[200px] bg-gray-900/95 backdrop-blur-sm border border-white/20 rounded shadow-md p-2 z-[9999]"
             sideOffset={5}
             align="end"
             side="bottom"
           >
-          <DropdownMenu.Item onSelect={handleEditDetails} className={`${listItemClassNames.option}  `}>
+          {/* <DropdownMenu.Item onSelect={handleEditDetails} className={`${listItemClassNames.option}  `}>
             <HiLink className={`${listItemClassNames.icon} text-main-blue`} />
             <p className="ml-2 text-sm text-white hover:text-main-blue font-medium">Edit Livestream/Channel</p>
-          </DropdownMenu.Item>
+          </DropdownMenu.Item> */}
           <DropdownMenu.Item onSelect={handleCopyStreamLink} className={listItemClassNames.option}>
             <AiOutlineEdit className={`${listItemClassNames.icon} text-green-500`} />
             <p className="ml-2 text-sm font-medium text-white hover:text-green-500">Copy Stream Link</p>
           </DropdownMenu.Item>
-          <DropdownMenu.Item onSelect={handleScheduleStream} className={listItemClassNames.option}>
+          {/* <DropdownMenu.Item onSelect={handleScheduleStream} className={listItemClassNames.option}>
             <PiCalendarCheckBold className={`${listItemClassNames.icon} text-blue-500`} />
             <p className="ml-2 text-sm font-medium text-white hover:text-blue-500">Schedule stream</p>
-          </DropdownMenu.Item>
+          </DropdownMenu.Item> */}
           <DropdownMenu.Item onSelect={handleDeleteChannel} className={listItemClassNames.option}>
             <RiDeleteBin6Line className={`${listItemClassNames.icon} text-red-700`} />
             <p className="ml-2 text-sm font-medium text-white hover:text-red-700">Delete channel</p>

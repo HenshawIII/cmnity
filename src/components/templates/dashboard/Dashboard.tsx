@@ -140,46 +140,50 @@ const filteredStreams = useMemo(() => {
             ) : canCreateStream ? (
               // Show "Create Channel" message and CTA if no streams are available
               <>
-                <div className="w-full flex flex-col items-center justify-center p-8 space-y-6 text-center">
-                  <div className="w-32 h-32 rounded-full bg-white/10 flex items-center justify-center border-4 border-dashed border-purple-400/50">
-                    <RiVideoAddLine className="text-purple-400 w-16 h-16" />
+                <div className="w-full col-span-full max-w-none flex bg-transparent items-center justify-between p-4 rounded-lg">
+                  {/* Round Icon */}
+                  <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-dashed border-purple-400/50 bg-white/10 flex items-center justify-center">
+                    <RiVideoAddLine className="text-purple-400 w-16 h-16" onClick={() => setIsDialogOpen(true)} />
                   </div>
-                  <div className="space-y-2">
-                    <h3 className="text-white font-bold text-2xl">No Channels Yet</h3>
-                    <p className="text-gray-300 text-sm max-w-md">
-                      Create your first streaming channel to start broadcasting live content to your audience.
-                    </p>
+
+                  {/* Title */}
+                  <div className="text-center">
+                    <h2 className="text-white font-bold text-2xl">No Channels Yet</h2>
                   </div>
-                  <Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                    <Dialog.Trigger asChild>
-                      <button
-                        onClick={() => setIsDialogOpen(true)}
-                        className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 flex items-center gap-2"
-                      >
-                        <RiVideoAddLine className="w-5 h-5" />
-                        Create Channel
-                      </button>
-                    </Dialog.Trigger>
-                    <Dialog.Portal>
-                      <Dialog.Overlay className="fixed inset-0 bg-black/70 backdrop-blur-sm" />
-                      <Dialog.Content className="fixed left-1/2 top-1/2 max-h-[85vh] h-full w-[90vw] overflow-y-auto flex py-16 mt-10 flex-col justify-center items-center max-w-[34rem] -translate-x-1/2 -translate-y-1/2 rounded-xl bg-gray-900/95 backdrop-blur-sm border border-white/20 px-10 max-sm:px-6 shadow-2xl">
-                        <Dialog.Title className="text-white text-center text-xl font-bold">Create New Channel</Dialog.Title>
 
-                        <div className="w-full h-full my-5">
-                          <CreateLivestream close={() => setIsDialogOpen(false)} />
-                        </div>
+                  {/* Create Button */}
+                  <div className="flex flex-col items-center justify-center gap-3">
+                    <Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                      <Dialog.Trigger asChild>
+                        <button
+                          onClick={() => setIsDialogOpen(true)}
+                          className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 flex items-center gap-2"
+                        >
+                          <RiVideoAddLine className="w-5 h-5" />
+                          Create Channel
+                        </button>
+                      </Dialog.Trigger>
+                      <Dialog.Portal>
+                        <Dialog.Overlay className="fixed inset-0 bg-black/70 backdrop-blur-sm" />
+                        <Dialog.Content className="fixed left-1/2 top-1/2 max-h-[85vh] h-full w-[90vw] overflow-y-auto flex py-16 mt-10 flex-col justify-center items-center max-w-[34rem] -translate-x-1/2 -translate-y-1/2 rounded-xl bg-gray-900/95 backdrop-blur-sm border border-white/20 px-10 max-sm:px-6 shadow-2xl">
+                          <Dialog.Title className="text-white text-center text-xl font-bold">Create New Channel</Dialog.Title>
 
-                        <Dialog.Close asChild>
-                          <button
-                            className="absolute right-2.5 top-2.5 inline-flex size-[25px] appearance-none items-center justify-center rounded-full text-white hover:bg-white/10 focus:shadow-[0_0_0_2px] focus:shadow-purple-500 focus:outline-none transition-colors"
-                            aria-label="Close"
-                          >
-                            <IoMdClose className="text-white font-medium text-4xl" />
-                          </button>
-                        </Dialog.Close>
-                      </Dialog.Content>
-                    </Dialog.Portal>
-                  </Dialog.Root>
+                          <div className="w-full h-full my-5">
+                            <CreateLivestream close={() => setIsDialogOpen(false)} />
+                          </div>
+
+                          <Dialog.Close asChild>
+                            <button
+                              className="absolute right-2.5 top-2.5 inline-flex size-[25px] appearance-none items-center justify-center rounded-full text-white hover:bg-white/10 focus:shadow-[0_0_0_2px] focus:shadow-purple-500 focus:outline-none transition-colors"
+                              aria-label="Close"
+                            >
+                              <IoMdClose className="text-white font-medium text-4xl" />
+                            </button>
+                          </Dialog.Close>
+                        </Dialog.Content>
+                      </Dialog.Portal>
+                    </Dialog.Root>
+                  </div>
                 </div>
               </>
             ) : (
@@ -187,7 +191,7 @@ const filteredStreams = useMemo(() => {
               filteredStreams.map((stream) => (
                 <div key={stream.id} className="col-span-full w-full">
                   <ChannelCardRedesign
-                    title={stream.name}
+                    title={stream.title || stream.name}
                     image={image1}
                     logo={stream.logo}
                     goLive={() => initiateLiveVideo(stream.id)}

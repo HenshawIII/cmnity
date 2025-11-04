@@ -233,32 +233,6 @@ export function PlayerWithControls({
     return <div className="text-center text-red-500 mt-10">{error}</div>;
   }
 
-  // 3. Gate modal for paid streams
-  if (!hasAccess && stream && stream.viewMode !== 'free') {
-    return (
-      <StreamGateModal
-        open={!hasAccess}
-        onClose={() => router.back()}
-        title="Locked Stream"
-      >
-        <StreamPayment
-          playbackId={playbackId}
-          usdAmount={stream.amount}
-          recipientAddress={stream.creatorId}
-          onPaymentSuccess={() => {
-            setHasAccess(true);
-            if (publicKey) {
-              markPaid(publicKey.toBase58());
-            }
-          }}
-          processPayment={processPayment}
-          processingPayment={processingPayment}
-          walletReady={walletReady}
-        />
-      </StreamGateModal>
-    );
-  }
-
   return (
     <div
       className="min-h-screen w-full"
@@ -271,7 +245,7 @@ export function PlayerWithControls({
       <div className="container mx-auto px-4 py-6">
         {/* Title Header */}
         <div className="w-full flex flex-col sm:flex-row items-center justify-between">
-          <div className="flex-1 text-center text-xl font-semibold capitalize">{title}</div>
+          <div className="flex-1 text-center text-xl font-semibold capitalize">{stream?.title ?? title}</div>
         </div>
 
         {/* Main Content Area */}
@@ -410,7 +384,7 @@ export function PlayerWithControls({
 
             {/* Title and Viewer Count */}
             <div className="mt-3 flex items-center justify-between">
-              <p className="text-2xl font-semibold capitalize text-black">{title}</p>
+              <p className="text-2xl font-semibold capitalize text-black">{stream?.title ?? title}</p>
               <div className="flex items-center gap-2 text-sm text-gray-500">
                 <svg
                   width="19"
@@ -611,6 +585,30 @@ export function PlayerWithControls({
           </div>
         </div>
       </div>
+
+      {/* Gate modal for paid streams - rendered on top of main content */}
+      {!hasAccess && stream && stream.viewMode !== 'free' && (
+        <StreamGateModal
+          open={!hasAccess}
+          onClose={() => router.back()}
+          title="Locked Stream"
+        >
+          <StreamPayment
+            playbackId={playbackId}
+            usdAmount={stream.amount}
+            recipientAddress={stream.creatorId}
+            onPaymentSuccess={() => {
+              setHasAccess(true);
+              if (publicKey) {
+                markPaid(publicKey.toBase58());
+              }
+            }}
+            processPayment={processPayment}
+            processingPayment={processingPayment}
+            walletReady={walletReady}
+          />
+        </StreamGateModal>
+      )}
     </div>
   );
 }

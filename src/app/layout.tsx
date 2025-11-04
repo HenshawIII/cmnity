@@ -37,7 +37,7 @@ export default function RootLayout({
         <link rel="icon" href="/assets/images/favicon.ico" />
       </head>
       <body className={` antialiased`}>
-      <SolanaProvider customRpcUrl="https://solana-mainnet.g.alchemy.com/v2/8rgdAH9Vy_zuXQFA2hedqK_a_3GAxvuZ">
+      <SolanaProvider customRpcUrl="https://solana-devnet.g.alchemy.com/v2/8rgdAH9Vy_zuXQFA2hedqK_a_3GAxvuZ">
           <PrivyProvider
       appId={process.env.NEXT_PUBLIC_PRIVY_ENVIRONMENT_ID ?? ''}
       config={{
@@ -53,7 +53,7 @@ export default function RootLayout({
         
         },
         externalWallets: {solana: {connectors: toSolanaWalletConnectors()}},
-        loginMethods:['wallet','email'],
+        loginMethods:['wallet'],
       }}
     >
        
