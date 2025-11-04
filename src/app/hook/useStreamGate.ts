@@ -101,7 +101,7 @@ export function useStreamGate(playbackId: string) {
       console.log('Transaction sent successfully, signature:', signature);
 
       // Send payment info to backend (non-blocking)
-      await axios.post('http://localhost:5300/api/streams/addpayinguser', {
+      await axios.post('https://chaintv.onrender.com/api/streams/addpayinguser', {
         playbackId,
         walletAddress: publicKey.toBase58(),
         transactionSignature: signature,

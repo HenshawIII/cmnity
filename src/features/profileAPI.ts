@@ -42,7 +42,7 @@ export const updateProfile = createAsyncThunk(
   async ({ creatorAddress, profileData }: { creatorAddress: string; profileData: ProfileData }, { rejectWithValue }) => {
     try {
       const response = await axios.put(
-        `http://localhost:5300/api/creators/${creatorAddress}/profile`,
+        `https://chaintv.onrender.com/api/creators/${creatorAddress}/profile`,
         { ...profileData }
       );
       return response.data?.profile || profileData;
