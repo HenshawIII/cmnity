@@ -55,11 +55,13 @@ export default function Hero() {
 
           {/* Subtitle */}
           <p className="font-host-grotesk text-md  text-gray-300 mb-8 max-w-lg leading-tight">
-            Create, stream, and monetize your content with blockchain-powered tools. 
+            Create, stream, and monetize your content without middlemen. 
             Join the next generation of content creators on 402tv.
           </p>
 
-        
+          <p className="font-host-grotesk text-md mb-8 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600  max-w-lg leading-tight">
+           powered by Solana and x402
+          </p>
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-start items-center">
