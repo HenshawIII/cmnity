@@ -10,6 +10,7 @@ import Spinner from '@/components/Spinner';
 import Image from 'next/image';
 import Link from 'next/link';
 import HorizontalNavbar from '@/components/HorizontalNavbar';
+import Logo from '@/components/Logo';
 
 export default function LandingPage() {
   const router = useRouter();
@@ -32,7 +33,7 @@ export default function LandingPage() {
   // }
 
   return (
-    <div className="min-h-screen relative bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 flex flex-col pb-20">
+    <div className="min-h-screen relative bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 flex flex-col pb-2">
       <Hero />
       {/* Footer */}
      <footer className="border-t border-white/20 mt-12 pt-6 pb-2 px-4 w-full">
@@ -42,11 +43,12 @@ export default function LandingPage() {
       <Image src="/assets/xpn.svg" alt="Twitter" width={28} height={28} />
     </Link>
     {/* Reach Out Button */}
-    <button className="hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-md transition-colors">
-      Reach Out ?
+    <button className="hover:from-purple-600 hover:to-pink-600 bg-gradient-to-r from-transparent to-transparent text-white font-semibold px-6 py-2 rounded-md transition-colors">
+     <Link href="https://twitter.com/yourtwitter" target="_blank" rel="noopener noreferrer"> Reach Out ?</Link>
     </button>
     {/* Switchtv Text */}
-      <div className="text-center text-white text-sm mt-1">x402tv</div>
+      {/* <div className="text-center text-white text-sm mt-1">x402tv</div> */}
+      <Logo size="lg" />
   </div>
   <HorizontalNavbar />
 </footer>

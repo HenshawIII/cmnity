@@ -32,47 +32,45 @@ const HorizontalNavbar = ({ className }: HorizontalNavbarProps) => {
     },
     {
       name: 'Profile',
-      href: '/profile',
+      href: '/dashboard/settings',
       icon: FaRegUserCircle,
     },
   ];
 
   return (
     <nav className={clsx(
-      'fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-t border-gray-200 shadow-lg',
+      'fixed md:top-4 bottom-0 md:bottom-auto left-1/2 md:w-[60%] w-full -translate-x-1/2 z-50 bg-white/10 backdrop-blur-lg md:rounded-full border border-white/20 shadow-lg px-4 py-2',
       className
     )}>
-      <div className="max-w-md mx-auto px-4 py-2">
-        <div className="flex items-center justify-around">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = pathname === item.href;
-            
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={clsx(
-                  'flex flex-col items-center justify-center py-2 px-3 rounded-lg transition-all duration-200 min-w-[60px]',
-                  isActive
-                    ? 'text-blue-600 bg-blue-50'
-                    : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'
-                )}
-              >
-                <Icon className={clsx(
-                  'w-6 h-6 mb-1',
-                  isActive ? 'text-blue-600' : 'text-gray-600'
-                )} />
-                <span className={clsx(
-                  'text-xs font-medium',
-                  isActive ? 'text-blue-600' : 'text-gray-600'
-                )}>
-                  {item.name}
-                </span>
-              </Link>
-            );
-          })}
-        </div>
+      <div className="flex items-center justify-around gap-2">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = pathname === item.href;
+          
+          return (
+            <Link
+              key={item.name}
+              href={item.href}
+              className={clsx(
+                'flex flex-col items-center justify-center py-2 px-3 rounded-lg transition-all duration-200 min-w-[60px]',
+                isActive
+                  ? 'text-blue-600 bg-gradient-to-r from-purple-600/20 to-pink-600/20'
+                  : 'text-gray-300 hover:text-blue-600 hover:bg-white/10'
+              )}
+            >
+              <Icon className={clsx(
+                'w-5 h-5 mb-1',
+                isActive ? 'text-white' : 'text-gray-300'
+              )} />
+              <span className={clsx(
+                'text-xs font-medium',
+                isActive ? 'text-white' : 'text-gray-300'
+              )}>
+                {item.name}
+              </span>
+            </Link>
+          );
+        })}
       </div>
     </nav>
   );

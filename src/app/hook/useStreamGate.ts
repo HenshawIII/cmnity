@@ -47,16 +47,22 @@ export function useStreamGate(playbackId: string) {
       .finally(() => setLoading(false));
   }, [playbackId]);
 
-  // 2️⃣ Check if viewer's wallet address is in the Users array
+  // 2️⃣ Check if viewer's wallet address is in the Users array or if viewer is the creator
   useEffect(() => {
     if (!stream || !publicKey || stream.viewMode === 'free') return;
 
     const walletAddress = publicKey.toBase58();
+    
+    // Check if viewer is the creator (owner of the stream)
+    const isCreator = stream.creatorId?.toLowerCase() === walletAddress.toLowerCase();
+    
+    // Check if viewer has paid (is in Users array)
     const hasPaid = stream.Users?.some((user) => 
       user.payingUser?.toLowerCase() === walletAddress.toLowerCase()
     );
 
-    if (hasPaid) {
+    // Grant access if viewer is the creator or has paid
+    if (isCreator || hasPaid) {
       setHasAccess(true);
     }
   }, [stream, publicKey]);

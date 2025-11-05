@@ -5,6 +5,7 @@ import { AppDispatch, RootState } from '@/store/store';
 import { getAllStreams } from '@/features/streamAPI';
 import StreamsShowcase from '@/components/templates/landing/StreamsShowcase';
 import HorizontalNavbar from '@/components/HorizontalNavbar';
+import Logo from '@/components/Logo';
 
 export default function StreamViews() {
   const dispatch = useDispatch<AppDispatch>();
@@ -19,6 +20,9 @@ export default function StreamViews() {
 
   return (
     <div className="min-h-screen relative bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 flex flex-col pb-20">
+     <div className = "absolute top-4 left-4  ">
+        <Logo size="lg" />
+      </div>
       <div className="flex-1">
         <StreamsShowcase streams={streams} loading={loading} />
       </div>

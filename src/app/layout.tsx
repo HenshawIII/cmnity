@@ -1,10 +1,8 @@
 'use client';
 
 // import type { Metadata } from 'next';
-//  import { Inter } from 'next/font/google';
 import { Toaster } from 'sonner';
 import React from 'react';
-// const inter = Inter({ subsets: ['latin'] });
 import './globals.css';
 // import Providers from './providers';
 // import { headers } from 'next/headers';
@@ -33,10 +31,13 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <title>x402tv</title>
-        <meta name="description" content="x402 powered livestreaming on Solana" />
+        <meta name="description" content="x402 powered livestreaming on Solana" />
         <link rel="icon" href="/assets/images/favicon.ico" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@400;500;600;700;800&family=Host+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
       </head>
-      <body className={` antialiased`}>
+      <body className="antialiased">
       <SolanaProvider customRpcUrl="https://solana-devnet.g.alchemy.com/v2/8rgdAH9Vy_zuXQFA2hedqK_a_3GAxvuZ">
           <PrivyProvider
       appId={process.env.NEXT_PUBLIC_PRIVY_ENVIRONMENT_ID ?? ''}

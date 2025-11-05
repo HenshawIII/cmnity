@@ -6,6 +6,7 @@ import { FaTimes } from 'react-icons/fa';
 import { LuArrowLeftFromLine, LuArrowRightFromLine } from 'react-icons/lu';
 import clsx from 'clsx';
 import { X } from 'lucide-react';
+import Logo from '@/components/Logo';
 
 const DashboardLayout = ({
   children,
@@ -68,8 +69,8 @@ const DashboardLayout = ({
         >
           <div className="flex items-center justify-between py-4 border-b border-white/20">
             {!sidebarCollapsed && (
-              <div className="transition-all ease-in-out duration-500 font-bold flex justify-center items-center uppercase text-white">
-                <h1>Switch TV</h1>
+              <div className="">
+               <Logo size="lg" />
               </div>
             )}
             <button onClick={toggleSidebar} className="ml-auto text-gray-300 hover:text-white transition-colors">

@@ -102,6 +102,8 @@ const config: Config = {
       },
       fontFamily: {
         inter: ['Inter', 'sans-serif'],
+        'funnel-display': ['Funnel Display', 'sans-serif'],
+        'host-grotesk': ['Host Grotesk', 'Inter', 'sans-serif'],
       },
     },
   },

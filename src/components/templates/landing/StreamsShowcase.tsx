@@ -7,6 +7,7 @@ import Spinner from '@/components/Spinner';
 import Link from 'next/link';
 import { Stream, Asset } from '@/interfaces';
 import image1 from '@/assets/image1.png';
+// import Logo from '@/components/Logo';
 
 interface StreamsShowcaseProps {
   streams: Stream[];
@@ -31,7 +32,8 @@ export default function StreamsShowcase({ streams, loading }: StreamsShowcasePro
   }, [dispatch]);
 
   return (
-    <section id="streams-showcase" className="py-16 px-4 max-w-7xl mx-auto">
+    <section id="streams-showcase" className="py-16 px-4 max-w-7xl mx-auto mt-16 relative">
+      
       <h2 className="text-3xl font-bold text-white mb-8 text-center">Available Content</h2>
       
       {/* Tabs */}
