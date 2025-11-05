@@ -30,7 +30,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <title>x402tv</title>
+        <title>402tv</title>
         <meta name="description" content="x402 powered livestreaming on Solana" />
         <link rel="icon" href="/assets/images/favicon.ico" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -44,7 +44,7 @@ export default function RootLayout({
       config={{
         appearance: {
           landingHeader: '',
-          loginMessage: 'Welcome to x402tv',
+          loginMessage: 'Welcome to 402tv',
           theme: 'light',
           accentColor: '#3351FF',
           logo: 'https://res.cloudinary.com/dbkthd6ck/image/upload/v1737309623/chainfren_logo_eey39b.png',

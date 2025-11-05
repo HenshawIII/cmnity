@@ -56,7 +56,7 @@ export default function Hero() {
           {/* Subtitle */}
           <p className="font-host-grotesk text-md  text-gray-300 mb-8 max-w-lg leading-tight">
             Create, stream, and monetize your content with blockchain-powered tools. 
-            Join the next generation of content creators on x402tv.
+            Join the next generation of content creators on 402tv.
           </p>
 
         

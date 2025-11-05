@@ -71,7 +71,7 @@ export default function MobileSidebar({
         <div className="flex items-center justify-between p-4 border-b border-[#dfe0e1]">
           {!sidebarCollapsed && (
             <div className="transition-all ease-in-out duration-500 font-bold flex justify-center items-center uppercase text-black-primary-text">
-              <h1>x402tv</h1>
+              <h1>402tv</h1>
             </div>
           )}
 
