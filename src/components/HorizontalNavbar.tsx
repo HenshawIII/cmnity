@@ -39,7 +39,7 @@ const HorizontalNavbar = ({ className }: HorizontalNavbarProps) => {
 
   return (
     <nav className={clsx(
-      'fixed md:top-4 bottom-0 md:bottom-auto left-1/2 md:w-[60%] w-full -translate-x-1/2 z-50 bg-white/10 backdrop-blur-lg md:rounded-full border border-white/20 shadow-lg px-4 py-2',
+      'fixed md:top-4 bottom-0 md:bottom-auto left-1/2 md:w-[50%] lg:w-[60%] w-full -translate-x-1/2 z-50 bg-white/10 backdrop-blur-lg md:rounded-full border border-white/20 shadow-lg px-4 py-2',
       className
     )}>
       <div className="flex items-center justify-around gap-2">

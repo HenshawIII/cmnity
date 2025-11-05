@@ -23,8 +23,14 @@ export default function Hero() {
   const { login } = usePrivy();
   const router = useRouter();
 
-  
+  // Contract address - will be set when ready
+  const contractAddress = '7XKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU';
 
+  // Truncate contract address for display (responsive)
+  const truncateAddress = (address: string, startChars: number = 4, endChars: number = 4) => {
+    if (!address || address.length <= startChars + endChars) return address;
+    return `${address.slice(0, startChars)}...${address.slice(-endChars)}`;
+  };
 
   return (
     <section className="relative  ">
@@ -152,9 +158,14 @@ export default function Hero() {
                     <p className="font-host-grotesk text-gray-300 text-sm mb-4">
                       Verified smart contract address on Solana
                     </p>
-                    <div className="bg-black/20 backdrop-blur-sm rounded-lg p-4 border border-white/10 flex items-center gap-3 group">
-                      <code className="text-sm md:text-base text-gray-400 flex-1 font-mono blur-sm select-none">
-                        7XKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU
+                    <div className="bg-black/20 backdrop-blur-sm max-w-md rounded-lg p-4 border border-white/10 flex items-center gap-3 group overflow-hidden">
+                      {/* Mobile: show less characters */}
+                      <code className="text-xs sm:text-sm md:text-base text-gray-400 flex-1 font-mono blur-sm select-none md:hidden">
+                        {truncateAddress(contractAddress, 4, 4)}
+                      </code>
+                      {/* Desktop: show more characters */}
+                      <code className="hidden md:block text-xs sm:text-sm md:text-base text-gray-400 flex-1 font-mono blur-sm select-none">
+                        {truncateAddress(contractAddress, 8, 8)}
                       </code>
                       <button
                         disabled

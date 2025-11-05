@@ -33,7 +33,7 @@ export default function LandingPage() {
   // }
 
   return (
-    <div className="min-h-screen relative bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 flex flex-col pb-2">
+    <div className="min-h-screen relative bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 flex flex-col md:pb-2 pb-20">
       <Hero />
       {/* Footer */}
      <footer className="border-t border-white/20 mt-12 pt-6 pb-2 px-4 w-full">
