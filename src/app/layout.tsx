@@ -32,7 +32,7 @@ export default function RootLayout({
       <head>
         <title>402tv</title>
         <meta name="description" content="x402 powered livestreaming on Solana" />
-        <link rel="icon" href="/assets/images/favicon.ico" />
+        <link rel="icon" href="/assets/images/icinn.png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@400;500;600;700;800&family=Host+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
